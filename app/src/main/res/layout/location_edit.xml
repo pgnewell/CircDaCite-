@@ -1,0 +1,134 @@
+<ViewSwitcher
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/edit_switcher"
+    android:layout_width="fill_parent"
+    android:layout_height="120sp"
+    android:padding="6dip"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:layout_marginLeft="44dp"
+    android:layout_marginStart="44dp"
+    android:layout_marginTop="5dp">
+
+    <LinearLayout
+        android:id="@+id/text_view"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:baselineAligned="false">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4">
+
+            <TextView
+                android:id="@+id/info_location_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/info_location_address"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/locate_on_map_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:contentDescription="@string/locate_map_hint"
+                android:src="@drawable/maps"
+                android:layout_weight="1"
+                android:layout_gravity="center_horizontal"
+                android:focusableInTouchMode="false"
+                android:focusable="false"/>
+
+            <ImageView
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_menu_edit"
+                android:id="@+id/loc_edit_button"
+                android:focusableInTouchMode="false"
+                android:focusable="false"
+                android:contentDescription="@string/edit_loc_content_description" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edit_view"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="4">
+
+            <EditText
+                android:hint="@string/name_hint"
+                android:id="@+id/edit_location_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:textSize="16sp"
+                android:inputType="none" />
+
+            <EditText
+                android:hint="@string/address_hint"
+                android:id="@+id/edit_location_address"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="false"
+                android:textSize="16sp"
+                android:inputType="none" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/locate_on_map"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:contentDescription="@string/locate_map_hint"
+                android:src="@drawable/maps"
+                android:layout_weight="1"
+                android:layout_gravity="center_horizontal"
+                android:focusable="false"/>
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:text="@string/save_button_text"
+                android:id="@+id/loc_save_button"
+                android:focusable="false"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ViewSwitcher>
