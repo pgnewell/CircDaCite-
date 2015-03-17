@@ -7,10 +7,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Created by pgn on 12/28/14.
@@ -28,7 +31,8 @@ public class LocationsDbAdapter {
     private boolean mWritable;
 
     private static final String DATABASE_NAME = "CDC";
-    private static final String SQLITE_TABLE = "locations";
+    private static final String LOCATIONS_TABLE = "locations";
+    private static final String PATHS_TABLE = "paths";
     private static final int DATABASE_VERSION = 3;
 
     protected final Context mCtx;
@@ -40,7 +44,7 @@ public class LocationsDbAdapter {
 
         DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
-            InputStream str = context.getResources().openRawResource( R.raw.create_db);
+            InputStream str = context.getResources().openRawResource(R.raw.create_db);
             ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
             int size = 0;
             byte[] buffer = new byte[1024];
@@ -55,17 +59,23 @@ public class LocationsDbAdapter {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            Log.w(TAG, createText);
-            db.execSQL(createText);
+            String[] statements = (String[]) createText.split(";");
+            int idx;
+            for (String statement : statements ) {
+                Log.w(TAG, statement);
+                if (!statement.trim().isEmpty())
+                    db.execSQL(statement);
+            }
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS " + SQLITE_TABLE);
+            db.execSQL("DROP TABLE IF EXISTS " + LOCATIONS_TABLE);
             onCreate(db);
         }
+
     }
 
     public LocationsDbAdapter(Context ctx) {
@@ -89,7 +99,7 @@ public class LocationsDbAdapter {
         }
     }
 
-    public long createLocation(Location loc) {
+    public long createLocation(CDCLocation loc) {
 
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_NAME, loc.getName());
@@ -97,29 +107,30 @@ public class LocationsDbAdapter {
         initialValues.put(KEY_LAT, loc.getLat());
         initialValues.put(KEY_LONG, loc.getLng());
 
-        return mDb.insert(SQLITE_TABLE, null, initialValues);
+        return mDb.insert(LOCATIONS_TABLE, null, initialValues);
     }
 
     public boolean deleteAllLocations() {
 
         int doneDelete = 0;
-        doneDelete = mDb.delete(SQLITE_TABLE, null , null);
+        doneDelete = mDb.delete(LOCATIONS_TABLE, null , null);
         Log.w(TAG, Integer.toString(doneDelete));
         return doneDelete > 0;
 
     }
 
+
     public Cursor fetchLocationsByName(String inputText) throws SQLException {
         Log.w(TAG, inputText);
         Cursor mCursor = null;
         if (inputText == null  ||  inputText.length () == 0)  {
-            mCursor = mDb.query(SQLITE_TABLE, new String[] {KEY_ROWID,
+            mCursor = mDb.query(LOCATIONS_TABLE, new String[] {KEY_ROWID,
                             KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG},
                     null, null, null, null, null);
 
         }
         else {
-            mCursor = mDb.query(true, SQLITE_TABLE, new String[] {KEY_ROWID,
+            mCursor = mDb.query(true, LOCATIONS_TABLE, new String[] {KEY_ROWID,
                             KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG},
                     KEY_NAME + " like '%" + inputText + "%'", null,
                     null, null, null, null);
@@ -135,12 +146,12 @@ public class LocationsDbAdapter {
         Log.w(TAG, inputText);
         Cursor mCursor = null;
         if (inputText == null  ||  inputText.length () == 0)  {
-            mCursor = mDb.query("paths", new String[] {KEY_ROWID,KEY_NAME },
+            mCursor = mDb.query(PATHS_TABLE, new String[] {KEY_ROWID,KEY_NAME },
                     null, null, null, null, null);
 
         }
         else {
-            mCursor = mDb.query(true, SQLITE_TABLE, new String[] {KEY_ROWID,
+            mCursor = mDb.query(true, LOCATIONS_TABLE, new String[] {KEY_ROWID,
                             KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG},
                     KEY_NAME + " like '%" + inputText + "%'", null,
                     null, null, null, null);
@@ -154,7 +165,7 @@ public class LocationsDbAdapter {
 
     public Cursor fetchAllLocations() {
 
-        Cursor mCursor = mDb.query(SQLITE_TABLE, new String[] {KEY_ROWID,
+        Cursor mCursor = mDb.query(LOCATIONS_TABLE, new String[] {KEY_ROWID,
                         KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG},
                 null, null, null, null, null);
 
@@ -164,9 +175,28 @@ public class LocationsDbAdapter {
         return mCursor;
     }
 
+    public CDCLocation fetchNextLocation( Cursor cursor ) {
+        int count = cursor.getCount();
+        int id = cursor.getInt(0);
+        CDCLocation location = new CDCLocation(
+                cursor.getString(1),
+                cursor.getString(2),
+                cursor.getDouble(3),
+                cursor.getDouble(4)
+        );
+        cursor.moveToNext();
+        return location;
+    }
+ /*
+ * cursor should perhaps be static or another class, etc this is cheap but given what we have put
+ * this function in its proper place rather than having the calling function do it */
+    public void closeLocation( Cursor cursor ) {
+        cursor.close();
+    }
+
     public Cursor fetchAllPaths() {
 
-        Cursor mCursor = mDb.query("paths", new String[] {KEY_ROWID,KEY_NAME},
+        Cursor mCursor = mDb.query(PATHS_TABLE, new String[] {KEY_ROWID,KEY_NAME},
                 null, null, null, null, null);
 
         if (mCursor != null) {

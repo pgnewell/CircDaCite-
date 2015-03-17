@@ -13,19 +13,19 @@ import java.util.List;
  * Created by pgn on 12/4/14.
  */
 
-public class Location {
+public class CDCLocation {
     private long id;
     private String name;
     private String address;
     private LatLng latLng;
 
-    public Location( String name, String address, double latitude, double longitude) {
+    public CDCLocation(String name, String address, double latitude, double longitude) {
         this.latLng = new LatLng(latitude, longitude);
         this.name = name;
         this.address = address;
     }
 
-    public Location( String name, String address, Context context ) {
+    public CDCLocation(String name, String address, Context context) {
         this.name = name;
         this.address = address;
         setLocation(context);
@@ -45,6 +45,10 @@ public class Location {
 
     public String getAddress() {
         return address;
+    }
+
+    public LatLng getLatLng() {
+        return latLng;
     }
 
     public double getLat() {

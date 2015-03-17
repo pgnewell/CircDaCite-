@@ -1,6 +1,5 @@
 package com.pgnewell.cdc.circdacite;
 
-import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -51,7 +50,7 @@ public class LocationActivity extends ActionBarActivity {
 
     public void onClick(View view) {
         //@SuppressWarnings("unchecked")
-        Location loc = null;
+        CDCLocation loc = null;
         final EditText name = (EditText)findViewById(R.id.edit_location_name);
         final EditText address = (EditText)findViewById(R.id.edit_location_address);
         switch (view.getId()) {
@@ -63,7 +62,7 @@ public class LocationActivity extends ActionBarActivity {
             case R.id.loc_save_button:
                    String nm = name.getText().toString();
                 String addr = address.getText().toString();
-                loc = new Location( nm, addr, this );
+                loc = new CDCLocation( nm, addr, this );
                 dbHelper.createLocation(loc);
                 break;
         }

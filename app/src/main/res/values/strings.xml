@@ -21,12 +21,23 @@
     <string name="locate_map_hint">Go to map to locate</string>
     <string name="some_text">     Locations!</string>
     <string name="some_hint">     Type here to filter…</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">Circ Da Cite Map</string>
     <string name="path_map_hint">Setup path on map</string>
     <string name="title_activity_path">Path</string>
     <string name="name_hint">name</string>
     <string name="address_hint">Address</string>
     <string name="edit_loc_content_description">Edit Location</string>
     <string name="menu_legalnotices">Legal Notices</string>
+    <string name="loc_edit_name_hint">Enter Location name</string>
+    <string name="clear_map">Clear</string>
+    <string name="reset_map">Reset</string>
+    <string name="click_to_create_location">Click to create location</string>
+    <string name="add_button">Add</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="map_not_ready">Map is not ready</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dialog_save_location">Save Location</string>
 
 </resources>

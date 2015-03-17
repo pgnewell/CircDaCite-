@@ -1,22 +1,77 @@
 package com.pgnewell.cdc.circdacite;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.Interpolator;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsFragment extends FragmentActivity {
+import java.sql.SQLException;
+
+public class MapsFragment extends FragmentActivity implements
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowClickListener,
+        GoogleMap.OnMarkerDragListener,
+        OnMapReadyCallback,
+        SaveLocationFragment.SaveLocationDialogListener {
+
+    private static final LatLng KENDALL = new LatLng(42.3628735,-71.0900971);
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private LatLngBounds mBounds;
+    private Marker mLastSelectedMarker;
+
+    private TextView mTopText;
+    private LocationsDbAdapter dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        mTopText = (TextView) findViewById(R.id.top_text);
+
+        dbHelper = new LocationsDbAdapter(this);
+
+        try {
+            dbHelper.open(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         setUpMapIfNeeded();
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync( this );
     }
 
     @Override
@@ -25,6 +80,56 @@ public class MapsFragment extends FragmentActivity {
         setUpMapIfNeeded();
     }
 
+    class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
+        // These a both viewgroups containing an ImageView with id "badge" and two TextViews with id
+        // "title" and "snippet".
+        private final View mWindow;
+        private final View mContents;
+
+        CustomInfoWindowAdapter() {
+            mWindow = getLayoutInflater().inflate(R.layout.location_info_window, null);
+            mContents = getLayoutInflater().inflate(R.layout.location_info_contents, null);
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            render(marker, mWindow);
+            return mWindow;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            render(marker, mContents);
+            return mContents;
+        }
+
+        private void render(Marker marker, View view) {
+            int badge = R.drawable.ic_launcher;
+            ((ImageView) view.findViewById(R.id.loc_icon)).setImageResource(badge);
+
+            String title = marker.getTitle();
+            TextView titleUi = ((TextView) view.findViewById(R.id.title));
+            if (title != null) {
+                // Spannable string allows us to edit the formatting of the text.
+                SpannableString titleText = new SpannableString(title);
+                titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
+                titleUi.setText(titleText);
+            } else {
+                titleUi.setText("");
+            }
+
+            String snippet = marker.getSnippet();
+            TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
+            if (snippet != null && snippet.length() > 12) {
+                SpannableString snippetText = new SpannableString(snippet);
+                snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
+                snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 12, snippet.length(), 0);
+                snippetUi.setText(snippetText);
+            } else {
+                snippetUi.setText("");
+            }
+        }
+    }
     /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
      * installed) and the map has not already been instantiated.. This will ensure that we only ever
@@ -60,6 +165,173 @@ public class MapsFragment extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        LatLng ll = KENDALL;
+        mMap.setMyLocationEnabled(true);
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Criteria c = new Criteria();
+        String p = lm.getBestProvider(c, true);
+
+        Location loc = lm.getLastKnownLocation(p);
+
+        if(loc!=null) {
+            ll = new LatLng(loc.getLatitude(), loc.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(ll).title("You're here"));
+        }
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng position) {
+                //mMap.addMarker(new MarkerOptions().position(position).title("New location"));
+                DialogFragment dialog = new SaveLocationFragment();
+                dialog.show(getFragmentManager(), "SaveLocationFragment");
+                // mMap.setOnMarkerDragListener( );
+                //path.add(new PathLocation(position, current_type, ""));
+
+            }
+        });
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, 15));
+
     }
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
+
+        // Hide the zoom controls as the button panel will cover it.
+        mMap.getUiSettings().setZoomControlsEnabled(false);
+
+        // Add lots of markers to the map.
+        addMarkersToMap();
+
+        // Setting an info window adapter allows us to change the both the contents and look of the
+        // info window.
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
+
+        // Set listeners for marker events.  See the bottom of this class for their behavior.
+        mMap.setOnMarkerClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMarkerDragListener(this);
+
+        // Override the default content description on the view, for accessibility mode.
+        // Ideally this string would be localised.
+        map.setContentDescription("Map with lots of markers.");
+
+        // Pan to see all markers in view.
+        // Cannot zoom to bounds until the map has a size.
+        final View mapView = getSupportFragmentManager().findFragmentById(R.id.map).getView();
+        if (mapView.getViewTreeObserver().isAlive()) {
+            mapView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @SuppressWarnings("deprecation") // We use the new method when supported
+                @SuppressLint("NewApi") // We check which build version we are using.
+                @Override
+                public void onGlobalLayout() {
+                   if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                        mapView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    } else {
+                        mapView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mBounds, 50));
+                }
+            });
+        }
+    }
+
+    private void addMarkersToMap() {
+        Cursor cursor = dbHelper.fetchAllLocations();
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+
+        while (!cursor.isLast()) {
+            CDCLocation loc = dbHelper.fetchNextLocation(cursor);
+            mMap.addMarker(new MarkerOptions()
+                    .position(loc.getLatLng())
+                    .title(loc.getName())
+                    .snippet(loc.getAddress())
+                    );
+            boundsBuilder.include(loc.getLatLng());
+        }
+        mBounds = boundsBuilder.build();
+        // Uses a colored icon.
+        //        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+        // Uses a custom icon with the info window popping out of the center of the icon.
+        //      .icon(BitmapDescriptorFactory.fromResource(R.drawable.arrow))
+        //      .infoWindowAnchor(0.5f, 0.5f));
+
+        // Creates a draggable marker. Long press to drag.
+        //      .draggable(true));
+
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        mLastSelectedMarker = marker;
+        // We return false to indicate that we have not consumed the event and that we wish
+        // for the default behavior to occur (which is for the camera to move such that the
+        // marker is centered and for the marker's info window to open, if it has one).
+        return false;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Toast.makeText(this, "Click Info Window", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+        mTopText.setText("onMarkerDragStart");
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        mTopText.setText("onMarkerDragEnd");
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+        mTopText.setText("onMarkerDrag.  Current Position: " + marker.getPosition());
+    }
+
+    // The dialog fragment receives a reference to this Activity through the
+    // Fragment.onAttach() callback, which it uses to call the following methods
+    // defined by the NoticeDialogFragment.NoticeDialogListener interface
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        // User touched the dialog's positive button
+        EditText locName = (EditText)
+                dialog.getView().findViewById(R.id.edit_location_name);
+        EditText locAddress = (EditText)
+                dialog.getView().findViewById(R.id.edit_location_address);
+    }
+
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // User touched the dialog's negative button
+            dialog.getDialog().cancel();
+    }
+
+
+    private boolean checkReady() {
+        if (mMap == null) {
+            Toast.makeText(this, R.string.map_not_ready, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    /** Called when the Clear button is clicked. */
+    public void onClearMap(View view) {
+        if (!checkReady()) {
+            return;
+        }
+        mMap.clear();
+    }
+
+    /** Called when the Reset button is clicked. */
+    public void onResetMap(View view) {
+        if (!checkReady()) {
+            return;
+        }
+        // Clear the map because we don't want duplicates of the markers.
+        mMap.clear();
+        addMarkersToMap();
+    }
+
 }

@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -186,7 +185,7 @@ public class LocationList extends ActionBarActivity {
 
     public void onClick(View view) {
         //@SuppressWarnings("unchecked")
-        Location loc = null;
+        CDCLocation loc = null;
         switch (view.getId()) {
             case R.id.loc_edit_button:
                 // set up edit

@@ -1,15 +1,7 @@
 package com.pgnewell.cdc.circdacite;
 
-import android.content.Context;
-import android.location.Address;
-import android.location.Geocoder;
-
-import com.google.android.gms.maps.model.LatLng;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by pgn on 1/5/15.
@@ -17,19 +9,19 @@ import java.util.List;
 public class Path {
     private long id;
     private String name;
-    private ArrayList<Location> locations;
+    private ArrayList<CDCLocation> locations;
 
     public Path( String name ) {
         this.name = name;
-        locations = new ArrayList<Location>();
+        locations = new ArrayList<CDCLocation>();
     }
 
-    public void addLocation( Location loc ) {
+    public void addLocation( CDCLocation loc ) {
         this.locations.add(loc);
     }
 
-    public void dropLocation( Location loc ) {
-        for (Iterator<Location> it = this.locations.iterator(); it.hasNext();)
+    public void dropLocation( CDCLocation loc ) {
+        for (Iterator<CDCLocation> it = this.locations.iterator(); it.hasNext();)
             if (it.next().getId() == loc.getId())
                 it.remove();
     }

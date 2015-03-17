@@ -42,7 +42,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+       </activity>
         <activity
             android:name=".PathActivity"
             android:label="@string/title_activity_path" >
