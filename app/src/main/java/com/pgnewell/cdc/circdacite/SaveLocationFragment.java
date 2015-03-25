@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.pgnewell.cdc.circdacite.R;
 
 /**
@@ -31,8 +32,8 @@ public class SaveLocationFragment extends DialogFragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_NAME = "loc_name";
-    private static final String ARG_ADDRESS = "loc_address";
+    public static final String ARG_LATITUDE = "latitude";
+    public static final String ARG_LONGITUDE = "longitude";
 
     // TODO: Rename and change types of parameters
     private String mLocName;
@@ -44,19 +45,18 @@ public class SaveLocationFragment extends DialogFragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param name Parameter 1.
-     * @param address Parameter 2.
+     * @param location Parameter 1.
      * @return A new instance of fragment SaveLocationFragment.
      */
     // TODO: Rename and change types and number of parameters
-//    public static SaveLocationFragment newInstance(String name, String address) {
-//        SaveLocationFragment fragment = new SaveLocationFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_NAME, name);
-//        args.putString(ARG_ADDRESS, address);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
+    public static SaveLocationFragment newInstance(LatLng location) {
+        SaveLocationFragment fragment = new SaveLocationFragment();
+        Bundle args = new Bundle();
+        args.putDouble(ARG_LATITUDE, location.latitude);
+        args.putDouble(ARG_LONGITUDE, location.longitude);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public SaveLocationFragment() {
         // Required empty public constructor
@@ -66,16 +66,16 @@ public class SaveLocationFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Build the dialog and set up the button click handlers
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.dialog_save_location)
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        builder.setView(inflater.inflate(R.layout.fragment_save_location, null))
+                .setMessage(R.string.dialog_save_location)
                 .setPositiveButton(R.string.add_button, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // Send the positive button event back to the host activity
                         mListener.onDialogPositiveClick(SaveLocationFragment.this);
                     }
                 })
                 .setNegativeButton(R.string.cancel_button, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // Send the negative button event back to the host activity
                         mListener.onDialogNegativeClick(SaveLocationFragment.this);
                     }
                 });
@@ -108,12 +108,12 @@ public class SaveLocationFragment extends DialogFragment {
 //        return builder.create();
 //    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_save_location, container, false);
-    }
+//    @Override
+//    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+//                             Bundle savedInstanceState) {
+//        // Inflate the layout for this fragment
+//        return inflater.inflate(R.layout.fragment_save_location, container, false);
+//    }
 
 /*
     // TODO: Rename method, update argument and hook method into UI event

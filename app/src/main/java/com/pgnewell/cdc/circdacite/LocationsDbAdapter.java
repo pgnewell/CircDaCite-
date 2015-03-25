@@ -119,6 +119,22 @@ public class LocationsDbAdapter {
 
     }
 
+    public CDCLocation fetchLocationByName(String inputText) throws SQLException {
+        Log.w(TAG, inputText);
+        Cursor mCursor = null;
+        CDCLocation loc;
+        mCursor = mDb.query(true, LOCATIONS_TABLE, new String[] {KEY_ROWID,
+                        KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG}, KEY_NAME + " = ?",
+                new String[] {inputText}, null, null, null, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+            loc = CDCLocation.extract(mCursor);
+        } else {
+            throw new SQLException("did not find a " + inputText);
+        }
+        return loc;
+
+    }
 
     public Cursor fetchLocationsByName(String inputText) throws SQLException {
         Log.w(TAG, inputText);

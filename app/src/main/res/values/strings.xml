@@ -37,7 +37,14 @@
     <string name="map_not_ready">Map is not ready</string>
 
 <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="dialog_save_location">Save Location</string>
+    <string name="path_map">Paths</string>
+    <string name="locations_map">Locations</string>
+    <string-array name="planets_array">
+        <item>Make start of path</item>
+        <item>Add to path</item>
+        <item>Remove from path</item>
+        <item>Remove from map</item>
+    </string-array>
 
 </resources>

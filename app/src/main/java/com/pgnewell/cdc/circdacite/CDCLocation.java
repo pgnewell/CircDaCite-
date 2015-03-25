@@ -1,6 +1,7 @@
 package com.pgnewell.cdc.circdacite;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 
@@ -97,6 +98,12 @@ public class CDCLocation {
             }
         }
 
+    }
+    public static CDCLocation extract( Cursor cursor ) {
+        CDCLocation loc = new CDCLocation(
+            cursor.getString(1),cursor.getString(2),cursor.getDouble(3), cursor.getDouble(4)
+        );
+        return loc;
     }
 
 }

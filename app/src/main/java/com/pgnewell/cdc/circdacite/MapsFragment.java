@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -54,6 +56,7 @@ public class MapsFragment extends FragmentActivity implements
 
     private TextView mTopText;
     private LocationsDbAdapter dbHelper;
+    private SaveLocationFragment.SaveLocationDialogListener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +83,7 @@ public class MapsFragment extends FragmentActivity implements
         setUpMapIfNeeded();
     }
 
-    class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
+    class CustomInfoWindowAdapter implements InfoWindowAdapter {
         // These a both viewgroups containing an ImageView with id "badge" and two TextViews with id
         // "title" and "snippet".
         private final View mWindow;
@@ -107,8 +110,8 @@ public class MapsFragment extends FragmentActivity implements
             int badge = R.drawable.ic_launcher;
             ((ImageView) view.findViewById(R.id.loc_icon)).setImageResource(badge);
 
-            String title = marker.getTitle();
-            TextView titleUi = ((TextView) view.findViewById(R.id.title));
+            String title = marker.getTitle().toString();
+            TextView titleUi = ((TextView) view.findViewById(R.id.loc_edit_name));
             if (title != null) {
                 // Spannable string allows us to edit the formatting of the text.
                 SpannableString titleText = new SpannableString(title);
@@ -120,14 +123,7 @@ public class MapsFragment extends FragmentActivity implements
 
             String snippet = marker.getSnippet();
             TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
-            if (snippet != null && snippet.length() > 12) {
-                SpannableString snippetText = new SpannableString(snippet);
-                snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
-                snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 12, snippet.length(), 0);
-                snippetUi.setText(snippetText);
-            } else {
-                snippetUi.setText("");
-            }
+            snippetUi.setText(snippet);
         }
     }
     /**
@@ -182,8 +178,8 @@ public class MapsFragment extends FragmentActivity implements
             @Override
             public void onMapClick(LatLng position) {
                 //mMap.addMarker(new MarkerOptions().position(position).title("New location"));
-                DialogFragment dialog = new SaveLocationFragment();
-                dialog.show(getFragmentManager(), "SaveLocationFragment");
+                DialogFragment dialog = SaveLocationFragment.newInstance(position);
+                dialog.show(getFragmentManager(), "SaveLocation");
                 // mMap.setOnMarkerDragListener( );
                 //path.add(new PathLocation(position, current_type, ""));
 
@@ -240,12 +236,13 @@ public class MapsFragment extends FragmentActivity implements
         Cursor cursor = dbHelper.fetchAllLocations();
         LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
 
-        while (!cursor.isLast()) {
+        while (!cursor.isAfterLast()) {
             CDCLocation loc = dbHelper.fetchNextLocation(cursor);
             mMap.addMarker(new MarkerOptions()
                     .position(loc.getLatLng())
                     .title(loc.getName())
                     .snippet(loc.getAddress())
+                    .draggable(true)
                     );
             boundsBuilder.include(loc.getLatLng());
         }
@@ -258,7 +255,6 @@ public class MapsFragment extends FragmentActivity implements
         //      .infoWindowAnchor(0.5f, 0.5f));
 
         // Creates a draggable marker. Long press to drag.
-        //      .draggable(true));
 
     }
 
@@ -273,11 +269,34 @@ public class MapsFragment extends FragmentActivity implements
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Toast.makeText(this, "Click Info Window", Toast.LENGTH_SHORT).show();
+        String title = marker.getTitle().toString();
+        mListener = (SaveLocationFragment.SaveLocationDialogListener) this;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choice");
+        CharSequence[] x = new String[] {"a","b"};
+        builder.setItems(x,null);
+        AlertDialog mAlertDialog = builder.create();
+        mAlertDialog.show();
+
+//        setContentView(R.layout.fragment_pathmenuitem);
+//        PathMenuFragment pathMenu = PathMenuFragment.newInstance("a","b");
+//        pathMenu.show(getFragmentManager(), "path_menu");
+//        String tag = "path";
+//        getFragmentManager().beginTransaction()
+//                .add(new Fragment(),tag)
+//                .commit();
+        //Toast.makeText(this, "Why is " + title + " coming up", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onMarkerDragStart(Marker marker) {
+        String title = marker.getTitle();
+        try {
+            CDCLocation loc = dbHelper.fetchLocationByName(title);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         mTopText.setText("onMarkerDragStart");
     }
 
@@ -295,11 +314,24 @@ public class MapsFragment extends FragmentActivity implements
     // Fragment.onAttach() callback, which it uses to call the following methods
     // defined by the NoticeDialogFragment.NoticeDialogListener interface
     public void onDialogPositiveClick(DialogFragment dialog) {
+        Bundle args = dialog.getArguments();
+        double locLat = args.getDouble(SaveLocationFragment.ARG_LATITUDE);
+        double locLong = args.getDouble(SaveLocationFragment.ARG_LONGITUDE);
         // User touched the dialog's positive button
         EditText locName = (EditText)
-                dialog.getView().findViewById(R.id.edit_location_name);
+                dialog.getDialog().findViewById(R.id.edit_location_name);
         EditText locAddress = (EditText)
-                dialog.getView().findViewById(R.id.edit_location_address);
+                dialog.getDialog().findViewById(R.id.edit_location_address);
+        CDCLocation location = new CDCLocation(
+                locName.getText().toString(), locAddress.getText().toString(), locLat, locLong
+        );
+        dbHelper.createLocation(location);
+        mMap.addMarker(new MarkerOptions()
+                        .position(location.getLatLng())
+                        .title(location.getName())
+                        .snippet(location.getAddress())
+        );
+
     }
 
     public void onDialogNegativeClick(DialogFragment dialog) {

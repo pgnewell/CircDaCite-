@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="empty_path">
+        <item>Make start of path</item>
+        <item>Make end of path</item>
+        <item>Remove location</item>
+    </string-array>
+    <string-array name="new_location">
+        <item>Add to path</item>
+        <item>Make end of path</item>
+        <item>Remove location</item>
+    </string-array>
+    <string-array name="start_of_path">
+        <item>Remove from path</item>
+        <item>Make end of path</item>
+    </string-array>
+    <string-array name="end_of_path">
+        <item>Make start of path</item>
+        <item>Remove from path</item>
+    </string-array>
+</resources>
