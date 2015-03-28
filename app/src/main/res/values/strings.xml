@@ -40,6 +40,11 @@
     <string name="dialog_save_location">Save Location</string>
     <string name="path_map">Paths</string>
     <string name="locations_map">Locations</string>
+    <string name="start_of_path">Start of Path</string>
+    <string name="add_to_path">Add to Path</string>
+    <string name="remove_from_path">Remove from path</string>
+    <string name="remove_location">Remove location</string>
+    <string name="enter_new_path">Enter path name</string>
     <string-array name="planets_array">
         <item>Make start of path</item>
         <item>Add to path</item>

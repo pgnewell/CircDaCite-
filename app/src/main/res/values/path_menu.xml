@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- when there is no path -->
     <string-array name="empty_path">
         <item>Make start of path</item>
-        <item>Make end of path</item>
         <item>Remove location</item>
     </string-array>
+    <!-- path is in process of being built -->
     <string-array name="new_location">
         <item>Add to path</item>
-        <item>Make end of path</item>
         <item>Remove location</item>
     </string-array>
+    <!-- when there is no path -->
     <string-array name="start_of_path">
         <item>Remove from path</item>
         <item>Make end of path</item>

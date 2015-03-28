@@ -5,11 +5,13 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -23,6 +25,7 @@ import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,12 +35,14 @@ import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.sql.SQLException;
 
@@ -49,6 +54,13 @@ public class MapsFragment extends FragmentActivity implements
         SaveLocationFragment.SaveLocationDialogListener {
 
     private static final LatLng KENDALL = new LatLng(42.3628735,-71.0900971);
+    private static enum PathCommands {
+        ADD_NEW_PATH,
+        ADD_TO_PATH,
+        REMOVE_FROM_PATH,
+        REMOVE_LOCATION
+    };
+
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private LatLngBounds mBounds;
@@ -56,13 +68,23 @@ public class MapsFragment extends FragmentActivity implements
 
     private TextView mTopText;
     private LocationsDbAdapter dbHelper;
-    private SaveLocationFragment.SaveLocationDialogListener mListener;
+    private Path mCurrentPath;
+    LinearLayout pathFrame;
+    EditText mCurrentPathName;
+    private BitmapDescriptor mStartMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         mTopText = (TextView) findViewById(R.id.top_text);
+        pathFrame = (LinearLayout)
+                MapsFragment.this.findViewById(R.id.path_frame);
+        mCurrentPathName = (EditText)
+                MapsFragment.this.findViewById(R.id.new_path_name);
+        mStartMarker =
+                BitmapDescriptorFactory.fromResource(R.drawable.start_marker);
+
 
         dbHelper = new LocationsDbAdapter(this);
 
@@ -268,15 +290,59 @@ public class MapsFragment extends FragmentActivity implements
     }
 
     @Override
-    public void onInfoWindowClick(Marker marker) {
+    public void onInfoWindowClick(final Marker marker) {
         String title = marker.getTitle().toString();
-        mListener = (SaveLocationFragment.SaveLocationDialogListener) this;
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final double lat = marker.getPosition().latitude;
+        final double lng = marker.getPosition().longitude;
+        final CDCLocation loc = new CDCLocation(marker.getTitle(),marker.getSnippet(),lat,lng);
+
         builder.setTitle("Choice");
-        CharSequence[] x = new String[] {"a","b"};
-        builder.setItems(x,null);
-        AlertDialog mAlertDialog = builder.create();
+
+        int drop_menu;
+        final PathCommands[] act_map;
+
+        if (mCurrentPath == null || mCurrentPath.empty()) {
+            drop_menu = R.array.empty_path;
+            act_map = new PathCommands[] {
+                    PathCommands.ADD_NEW_PATH,
+                    PathCommands.REMOVE_LOCATION
+            };
+        } else {
+            drop_menu = R.array.new_location;
+            act_map = new PathCommands[] {
+                    PathCommands.ADD_TO_PATH,
+                    PathCommands.REMOVE_LOCATION
+            };
+        }
+        builder.setItems(drop_menu, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                LinearLayout pathFrame = (LinearLayout)
+                        MapsFragment.this.findViewById(R.id.path_frame);
+                switch (act_map[which]) {
+                    // 0 is create a path and add the clicked location
+                    case ADD_NEW_PATH:
+                        mCurrentPath = new Path(mCurrentPathName.getText().toString());
+                        mCurrentPath.addLocation(loc);
+                        marker.setIcon(mStartMarker);
+                    // add to an existing path
+                    case ADD_TO_PATH:
+                        mCurrentPath.addLocation(loc);
+                        pathFrame.setVisibility(View.VISIBLE);
+                        mMap.addPolyline(new PolylineOptions()).setPoints(mCurrentPath.locations());
+                        break;
+                    // remove the location from the map
+                    case REMOVE_LOCATION:
+                        marker.remove();
+                        pathFrame.setVisibility(View.GONE);
+                        break;
+                }
+
+                dialog.dismiss();
+            }
+        });
+        final AlertDialog mAlertDialog = builder.create();
         mAlertDialog.show();
 
 //        setContentView(R.layout.fragment_pathmenuitem);
@@ -339,6 +405,9 @@ public class MapsFragment extends FragmentActivity implements
             dialog.getDialog().cancel();
     }
 
+    private void onPathMenuClick( DialogFragment dialog) {
+        String choice = dialog.getString(R.string.app_name);
+    }
 
     private boolean checkReady() {
         if (mMap == null) {
@@ -366,4 +435,27 @@ public class MapsFragment extends FragmentActivity implements
         addMarkersToMap();
     }
 
+    private void onSaveCurrentPath () {
+
+    }
+
+    private final class PathMenuOnClickListener implements
+            DialogInterface.OnClickListener {
+        public void onClick(DialogInterface dialog, int which) {
+            LinearLayout pathFrame = (LinearLayout)
+                    MapsFragment.this.findViewById(R.id.path_frame);
+            switch (which) {
+                case 0:
+                    mCurrentPath = new Path(mCurrentPathName.getText().toString());
+                case 1:
+                    pathFrame.setVisibility(View.GONE);
+                    break;
+                case 2:
+                    pathFrame.setVisibility(View.VISIBLE);
+                    break;
+            }
+
+            dialog.dismiss();
+        }
+    }
 }
