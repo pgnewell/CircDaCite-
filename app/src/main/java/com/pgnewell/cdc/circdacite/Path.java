@@ -12,7 +12,7 @@ import java.util.List;
 public class Path {
     private long id;
     private String name;
-    private ArrayList<CDCLocation> locations;
+    public ArrayList<CDCLocation> locations;
 
     public Path( String name ) {
         this.name = name;
@@ -58,7 +58,7 @@ public class Path {
         return last;
     }
 
-    public List<LatLng> locations() {
+    public List<LatLng> latLngs() {
         List<LatLng> this_list = new ArrayList<>(locations.size());
         Iterator<CDCLocation> it = this.locations.iterator();
         while (it.hasNext()) {

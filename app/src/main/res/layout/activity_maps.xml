@@ -74,8 +74,10 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:id="@+id/path_save_button"
             android:text="@string/save_button_text"
-            android:layout_gravity="right" />
+            android:layout_gravity="right"
+            android:onClick="onSaveCurrentPath"/>
     </LinearLayout>
 
 </LinearLayout>

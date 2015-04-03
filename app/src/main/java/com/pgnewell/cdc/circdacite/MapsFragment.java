@@ -2,27 +2,22 @@ package com.pgnewell.cdc.circdacite;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
-import android.opengl.Visibility;
 import android.os.Build;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.Interpolator;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,7 +27,6 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -45,13 +39,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.sql.SQLException;
+import java.util.List;
+import android.os.Handler;
 
 public class MapsFragment extends FragmentActivity implements
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMarkerDragListener,
         OnMapReadyCallback,
-        SaveLocationFragment.SaveLocationDialogListener {
+        SaveLocationFragment.SaveLocationDialogListener,
+        MyResultReceiver.Receiver {
 
     private static final LatLng KENDALL = new LatLng(42.3628735,-71.0900971);
     private static enum PathCommands {
@@ -71,7 +68,9 @@ public class MapsFragment extends FragmentActivity implements
     private Path mCurrentPath;
     LinearLayout pathFrame;
     EditText mCurrentPathName;
+    Button pathSaveButton;
     private BitmapDescriptor mStartMarker;
+    MyResultReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +83,15 @@ public class MapsFragment extends FragmentActivity implements
                 MapsFragment.this.findViewById(R.id.new_path_name);
         mStartMarker =
                 BitmapDescriptorFactory.fromResource(R.drawable.start_marker);
+        pathSaveButton = (Button) MapsFragment.this.findViewById(R.id.path_save_button);
 
+        mReceiver = new MyResultReceiver(new Handler());
+        mReceiver.setReceiver(this);
+
+//        final Intent intent = new Intent(Intent.ACTION_SYNC, null, this, QueryService.class);
+//        intent.putExtra("receiver", mReceiver);
+//        intent.putExtra("command", "query");
+//        startService(intent);
 
         dbHelper = new LocationsDbAdapter(this);
 
@@ -296,54 +303,67 @@ public class MapsFragment extends FragmentActivity implements
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final double lat = marker.getPosition().latitude;
         final double lng = marker.getPosition().longitude;
-        final CDCLocation loc = new CDCLocation(marker.getTitle(),marker.getSnippet(),lat,lng);
+        final CDCLocation loc;
+        try {
+            loc = dbHelper.fetchLocationByName(marker.getTitle());
 
-        builder.setTitle("Choice");
+            marker.setPosition(loc.getLatLng());
+            builder.setTitle("Choice");
 
-        int drop_menu;
-        final PathCommands[] act_map;
+            int drop_menu;
+            final PathCommands[] act_map;
 
-        if (mCurrentPath == null || mCurrentPath.empty()) {
-            drop_menu = R.array.empty_path;
-            act_map = new PathCommands[] {
-                    PathCommands.ADD_NEW_PATH,
-                    PathCommands.REMOVE_LOCATION
-            };
-        } else {
-            drop_menu = R.array.new_location;
-            act_map = new PathCommands[] {
-                    PathCommands.ADD_TO_PATH,
-                    PathCommands.REMOVE_LOCATION
-            };
-        }
-        builder.setItems(drop_menu, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                LinearLayout pathFrame = (LinearLayout)
-                        MapsFragment.this.findViewById(R.id.path_frame);
-                switch (act_map[which]) {
-                    // 0 is create a path and add the clicked location
-                    case ADD_NEW_PATH:
-                        mCurrentPath = new Path(mCurrentPathName.getText().toString());
-                        mCurrentPath.addLocation(loc);
-                        marker.setIcon(mStartMarker);
-                    // add to an existing path
-                    case ADD_TO_PATH:
-                        mCurrentPath.addLocation(loc);
-                        pathFrame.setVisibility(View.VISIBLE);
-                        mMap.addPolyline(new PolylineOptions()).setPoints(mCurrentPath.locations());
-                        break;
-                    // remove the location from the map
-                    case REMOVE_LOCATION:
-                        marker.remove();
-                        pathFrame.setVisibility(View.GONE);
-                        break;
-                }
-
-                dialog.dismiss();
+            if (mCurrentPath == null || mCurrentPath.empty()) {
+                drop_menu = R.array.empty_path;
+                act_map = new PathCommands[] {
+                        PathCommands.ADD_NEW_PATH,
+                        PathCommands.REMOVE_LOCATION
+                };
+            } else {
+                drop_menu = R.array.new_location;
+                act_map = new PathCommands[] {
+                        PathCommands.ADD_TO_PATH,
+                        PathCommands.REMOVE_LOCATION
+                };
             }
-        });
-        final AlertDialog mAlertDialog = builder.create();
-        mAlertDialog.show();
+            builder.setItems(drop_menu, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+
+                    pathSaveButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dbHelper.createPath(mCurrentPath);
+                            pathFrame.setVisibility(View.GONE);
+                        }
+                    });
+                    switch (act_map[which]) {
+                        // 0 is create a path and add the clicked location
+                        case ADD_NEW_PATH:
+                            mCurrentPath = new Path(mCurrentPathName.getText().toString());
+                            mCurrentPath.addLocation(loc);
+                            marker.setIcon(mStartMarker);
+                            pathFrame.setVisibility(View.VISIBLE);
+                            break;
+                        // add to an existing path
+                        case ADD_TO_PATH:
+                            mCurrentPath.addLocation(loc);
+                            pathFrame.setVisibility(View.VISIBLE);
+                            mMap.addPolyline(new PolylineOptions()).setPoints(mCurrentPath.latLngs());
+                            break;
+                        // remove the location from the map
+                        case REMOVE_LOCATION:
+                            marker.remove();
+                            break;
+                    }
+
+                    dialog.dismiss();
+                }
+            });
+            final AlertDialog mAlertDialog = builder.create();
+            mAlertDialog.show();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
 //        setContentView(R.layout.fragment_pathmenuitem);
 //        PathMenuFragment pathMenu = PathMenuFragment.newInstance("a","b");
@@ -439,23 +459,40 @@ public class MapsFragment extends FragmentActivity implements
 
     }
 
-    private final class PathMenuOnClickListener implements
-            DialogInterface.OnClickListener {
-        public void onClick(DialogInterface dialog, int which) {
-            LinearLayout pathFrame = (LinearLayout)
-                    MapsFragment.this.findViewById(R.id.path_frame);
-            switch (which) {
-                case 0:
-                    mCurrentPath = new Path(mCurrentPathName.getText().toString());
-                case 1:
-                    pathFrame.setVisibility(View.GONE);
-                    break;
-                case 2:
-                    pathFrame.setVisibility(View.VISIBLE);
-                    break;
-            }
-
-            dialog.dismiss();
+    // I am leaving this here as a simplistic example of how the OnClick can be done.
+    // The above anonymous version works here because it has a closure.
+//    private final class PathMenuOnClickListener implements
+//            DialogInterface.OnClickListener {
+//        public void onClick(DialogInterface dialog, int which) {
+//            LinearLayout pathFrame = (LinearLayout)
+//                    MapsFragment.this.findViewById(R.id.path_frame);
+//            switch (which) {
+//                case 0:
+//                    mCurrentPath = new Path(mCurrentPathName.getText().toString());
+//                case 1:
+//                    pathFrame.setVisibility(View.GONE);
+//                    break;
+//                case 2:
+//                    pathFrame.setVisibility(View.VISIBLE);
+//                    break;
+//            }
+//
+//            dialog.dismiss();
+//        }
+//    }
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        switch (resultCode) {
+            case 1:
+                //show progress
+                break;
+            case 2:
+                //List results = resultData.getParcelableList("results");
+                // do something interesting
+                // hide progress
+                break;
+            case 3:
+                // handle the error;
+                break;
         }
     }
 }

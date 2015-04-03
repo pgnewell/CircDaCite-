@@ -26,6 +26,13 @@ public class CDCLocation {
         this.address = address;
     }
 
+    public CDCLocation(int id, String name, String address, double latitude, double longitude) {
+        this.setId(id);
+        this.latLng = new LatLng(latitude, longitude);
+        this.name = name;
+        this.address = address;
+    }
+
     public CDCLocation(String name, String address, Context context) {
         this.name = name;
         this.address = address;
@@ -101,7 +108,10 @@ public class CDCLocation {
     }
     public static CDCLocation extract( Cursor cursor ) {
         CDCLocation loc = new CDCLocation(
-            cursor.getString(1),cursor.getString(2),cursor.getDouble(3), cursor.getDouble(4)
+            cursor.getInt(0),
+            cursor.getString(1),
+            cursor.getString(2),
+            cursor.getDouble(3), cursor.getDouble(4)
         );
         return loc;
     }

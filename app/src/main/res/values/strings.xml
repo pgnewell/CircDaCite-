@@ -51,5 +51,8 @@
         <item>Remove from path</item>
         <item>Remove from map</item>
     </string-array>
+    <string name="title_activity_x">XActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>

@@ -18,8 +18,7 @@ CREATE TABLE if not exists path_locations (
                     _path integer,
                     _location integer ,
                     name varchar(255),
-                    PRIMARY KEY (_path, _location),
-                    UNIQUE (name));
+                    PRIMARY KEY (_path, _location));
 
 INSERT INTO locations (name,address,latitude,longitude) VALUES 
     ("Kendall","Tech Centre",42.3628735,-71.0900971),

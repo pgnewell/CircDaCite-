@@ -90,8 +90,8 @@ public class LocationList extends ActionBarActivity {
                 LocationsDbAdapter.KEY_NAME,
                 LocationsDbAdapter.KEY_ADDRESS,
                 LocationsDbAdapter.KEY_ADDRESS //
-                //LocationsDbAdapter.KEY_LAT,
-                //LocationsDbAdapter.KEY_LONG
+                //LocationsDbAdapter.LOC_LAT,
+                //LocationsDbAdapter.LOC_LONG
         };
 
         // the XML defined views which the data will be bound to

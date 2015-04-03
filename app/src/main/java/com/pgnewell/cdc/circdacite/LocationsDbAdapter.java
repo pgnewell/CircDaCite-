@@ -7,23 +7,23 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by pgn on 12/28/14.
  */
 public class LocationsDbAdapter {
     public static final String KEY_ROWID = "_id";
+    public static final String LOC_ROWID= "_location";
+    public static final String PATH_ROWID= "_path";
     public static final String KEY_NAME = "name";
     public static final String KEY_ADDRESS = "address";
-    public static final String KEY_LAT = "latitude";
-    public static final String KEY_LONG = "longitude";
+    public static final String LOC_LAT = "latitude";
+    public static final String LOC_LONG = "longitude";
 
     private static final String TAG = "LocationsDbAdapter";
     private DatabaseHelper mDbHelper;
@@ -33,7 +33,8 @@ public class LocationsDbAdapter {
     private static final String DATABASE_NAME = "CDC";
     private static final String LOCATIONS_TABLE = "locations";
     private static final String PATHS_TABLE = "paths";
-    private static final int DATABASE_VERSION = 3;
+    private static final String PATH_LOCATIONS_TABLE = "path_locations";
+    private static final int DATABASE_VERSION = 1;
 
     protected final Context mCtx;
 
@@ -41,10 +42,24 @@ public class LocationsDbAdapter {
 
         private Context ctx;
         private String createText;
+        private int[] createFiles = {
+                R.raw.create_db_loc,
+                R.raw.create_db_paths,
+                R.raw.create_db_paths_loc,
+                R.raw.insert_loc_db};
+        private int dropFiles = R.raw.drop_db;
+        private String dropText = "";
 
         DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
-            InputStream str = context.getResources().openRawResource(R.raw.create_db);
+            createText = "";
+            for (int idx=0; idx < createFiles.length; idx++ )
+                createText += readSQLText(context, createFiles[idx]);
+            dropText = readSQLText(context, dropFiles);
+        }
+
+        private String readSQLText (Context context, int file) {
+            InputStream str = context.getResources().openRawResource(file);
             ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
             int size = 0;
             byte[] buffer = new byte[1024];
@@ -54,12 +69,16 @@ public class LocationsDbAdapter {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            createText = outputStream.toString();
-        }
+            return outputStream.toString();
 
+        }
         @Override
         public void onCreate(SQLiteDatabase db) {
-            String[] statements = (String[]) createText.split(";");
+            myExecSQL(db, createText);
+        }
+
+        private void myExecSQL(SQLiteDatabase db, String command) {
+            String[] statements = (String[]) command.split(";");
             int idx;
             for (String statement : statements ) {
                 Log.w(TAG, statement);
@@ -67,12 +86,11 @@ public class LocationsDbAdapter {
                     db.execSQL(statement);
             }
         }
-
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS " + LOCATIONS_TABLE);
+            myExecSQL(db, dropText);
             onCreate(db);
         }
 
@@ -104,10 +122,28 @@ public class LocationsDbAdapter {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_NAME, loc.getName());
         initialValues.put(KEY_ADDRESS, loc.getAddress());
-        initialValues.put(KEY_LAT, loc.getLat());
-        initialValues.put(KEY_LONG, loc.getLng());
+        initialValues.put(LOC_LAT, loc.getLat());
+        initialValues.put(LOC_LONG, loc.getLng());
 
         return mDb.insert(LOCATIONS_TABLE, null, initialValues);
+    }
+
+    public long createPath(Path path) {
+        long path_id, loc_path_id;
+        ContentValues pathInitialValues = new ContentValues();
+        pathInitialValues.put(KEY_NAME, path.getName());
+        path_id = mDb.insert(PATH_LOCATIONS_TABLE, null, pathInitialValues);
+        path.setId(path_id);
+        for (Iterator<CDCLocation> it = path.locations.iterator(); it.hasNext();) {
+            ContentValues locInitialValues = new ContentValues();
+            CDCLocation loc = it.next();
+            locInitialValues.put(LOC_ROWID, loc.getId());
+            locInitialValues.put(PATH_ROWID, path.getId());
+            loc_path_id = mDb.insert(PATH_LOCATIONS_TABLE, null, locInitialValues);
+            if (loc_path_id == -1)
+                return loc_path_id;
+        }
+        return path_id;
     }
 
     public boolean deleteAllLocations() {
@@ -124,7 +160,7 @@ public class LocationsDbAdapter {
         Cursor mCursor = null;
         CDCLocation loc;
         mCursor = mDb.query(true, LOCATIONS_TABLE, new String[] {KEY_ROWID,
-                        KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG}, KEY_NAME + " = ?",
+                        KEY_NAME, KEY_ADDRESS, LOC_LAT, LOC_LONG}, KEY_NAME + " = ?",
                 new String[] {inputText}, null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -141,13 +177,13 @@ public class LocationsDbAdapter {
         Cursor mCursor = null;
         if (inputText == null  ||  inputText.length () == 0)  {
             mCursor = mDb.query(LOCATIONS_TABLE, new String[] {KEY_ROWID,
-                            KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG},
+                            KEY_NAME, KEY_ADDRESS, LOC_LAT, LOC_LONG},
                     null, null, null, null, null);
 
         }
         else {
             mCursor = mDb.query(true, LOCATIONS_TABLE, new String[] {KEY_ROWID,
-                            KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG},
+                            KEY_NAME, KEY_ADDRESS, LOC_LAT, LOC_LONG},
                     KEY_NAME + " like '%" + inputText + "%'", null,
                     null, null, null, null);
         }
@@ -168,7 +204,7 @@ public class LocationsDbAdapter {
         }
         else {
             mCursor = mDb.query(true, LOCATIONS_TABLE, new String[] {KEY_ROWID,
-                            KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG},
+                            KEY_NAME, KEY_ADDRESS, LOC_LAT, LOC_LONG},
                     KEY_NAME + " like '%" + inputText + "%'", null,
                     null, null, null, null);
         }
@@ -182,7 +218,7 @@ public class LocationsDbAdapter {
     public Cursor fetchAllLocations() {
 
         Cursor mCursor = mDb.query(LOCATIONS_TABLE, new String[] {KEY_ROWID,
-                        KEY_NAME, KEY_ADDRESS, KEY_LAT, KEY_LONG},
+                        KEY_NAME, KEY_ADDRESS, LOC_LAT, LOC_LONG},
                 null, null, null, null, null);
 
         if (mCursor != null) {
