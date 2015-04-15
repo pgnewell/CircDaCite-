@@ -19,8 +19,8 @@
     <string name="title_activity_location">LocationActivity</string>
     <string name="save_button_text">Save</string>
     <string name="locate_map_hint">Go to map to locate</string>
-    <string name="some_text">     Locations!</string>
-    <string name="some_hint">     Type here to filter…</string>
+    <string name="some_text">Locations!</string>
+    <string name="some_hint">Type here to filter…</string>
     <string name="title_activity_maps">Circ Da Cite Map</string>
     <string name="path_map_hint">Setup path on map</string>
     <string name="title_activity_path">Path</string>
@@ -54,5 +54,14 @@
     <string name="title_activity_x">XActivity</string>
 
     <string name="hello_world">Hello world!</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="path_label">Path:</string>
+    <string name="path_name_hint">Path Name</string>
+    <string name="start_loc_label">Start:</string>
+    <string name="end_loc_label">End:</string>
+    <string name="end_loc_hint">End location</string>
+    <string name="start_loc_hint">Start location</string>
 
 </resources>

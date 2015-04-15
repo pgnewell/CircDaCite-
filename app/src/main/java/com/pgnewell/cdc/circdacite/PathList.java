@@ -75,7 +75,7 @@ public class PathList extends ActionBarActivity {
         // The desired columns to be bound
         String[] columns = new String[] {
                 LocationsDbAdapter.KEY_NAME,
-                LocationsDbAdapter.KEY_ADDRESS //
+                //LocationsDbAdapter.KEY_ADDRESS //
                 //LocationsDbAdapter.LOC_LAT,
                 //LocationsDbAdapter.LOC_LONG
         };

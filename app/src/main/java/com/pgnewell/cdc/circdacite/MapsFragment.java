@@ -78,9 +78,9 @@ public class MapsFragment extends FragmentActivity implements
         setContentView(R.layout.activity_maps);
         mTopText = (TextView) findViewById(R.id.top_text);
         pathFrame = (LinearLayout)
-                MapsFragment.this.findViewById(R.id.path_frame);
+                this.findViewById(R.id.path_frame);
         mCurrentPathName = (EditText)
-                MapsFragment.this.findViewById(R.id.new_path_name);
+                this.findViewById(R.id.new_path_name);
         mStartMarker =
                 BitmapDescriptorFactory.fromResource(R.drawable.start_marker);
         pathSaveButton = (Button) MapsFragment.this.findViewById(R.id.path_save_button);

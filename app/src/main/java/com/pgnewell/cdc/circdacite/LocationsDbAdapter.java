@@ -20,6 +20,8 @@ public class LocationsDbAdapter {
     public static final String KEY_ROWID = "_id";
     public static final String LOC_ROWID= "_location";
     public static final String PATH_ROWID= "_path";
+    public static final String PATH_SEQ = "seq";
+
     public static final String KEY_NAME = "name";
     public static final String KEY_ADDRESS = "address";
     public static final String LOC_LAT = "latitude";
@@ -134,6 +136,7 @@ public class LocationsDbAdapter {
         pathInitialValues.put(KEY_NAME, path.getName());
         path_id = mDb.insert(PATH_LOCATIONS_TABLE, null, pathInitialValues);
         path.setId(path_id);
+        int seq = 0;
         for (Iterator<CDCLocation> it = path.locations.iterator(); it.hasNext();) {
             ContentValues locInitialValues = new ContentValues();
             CDCLocation loc = it.next();
@@ -197,14 +200,14 @@ public class LocationsDbAdapter {
     public Cursor fetchPathsByName(String inputText) throws SQLException {
         Log.w(TAG, inputText);
         Cursor mCursor = null;
-        if (inputText == null  ||  inputText.length () == 0)  {
+        if (inputText == null || inputText.isEmpty())  {
             mCursor = mDb.query(PATHS_TABLE, new String[] {KEY_ROWID,KEY_NAME },
                     null, null, null, null, null);
 
         }
         else {
-            mCursor = mDb.query(true, LOCATIONS_TABLE, new String[] {KEY_ROWID,
-                            KEY_NAME, KEY_ADDRESS, LOC_LAT, LOC_LONG},
+            mCursor = mDb.query(true, PATHS_TABLE, new String[] {KEY_ROWID,
+                            KEY_NAME },
                     KEY_NAME + " like '%" + inputText + "%'", null,
                     null, null, null, null);
         }
