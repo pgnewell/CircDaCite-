@@ -63,5 +63,11 @@
     <string name="end_loc_label">End:</string>
     <string name="end_loc_hint">End location</string>
     <string name="start_loc_hint">Start location</string>
+    <string name="menu_db_dump">DB dump</string>
+    <string name="path_list_title">Paths!</string>
+    <string name="title_activity_path_list">PathList</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="menu_path_list">Paths List</string>
+    <string name="menu_loc_list">Location List</string>
 
 </resources>

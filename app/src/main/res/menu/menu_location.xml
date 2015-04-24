@@ -5,6 +5,11 @@
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
     <item
+        android:id="@+id/menu_db_dump"
+        android:orderInCategory="200"
+        app:showAsAction="never"
+        android:title="@string/menu_db_dump"/>
+    <item
         android:id="@+id/menu_legalnotices"
         android:orderInCategory="100"
         app:showAsAction="never"

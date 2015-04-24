@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.pgnewell.cdc.circdacite.dummy.PathMenuContent;
+import com.pgnewell.cdc.circdacite.pathmenu.Content;
 
 /**
  * A fragment representing a list of Items.
@@ -56,8 +56,8 @@ public class PathMenuItemFragment extends ListFragment {
         }
 
         // TODO: Change Adapter to display your content
-        setListAdapter(new ArrayAdapter<PathMenuContent.PathMenuItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, PathMenuContent.ITEMS));
+        setListAdapter(new ArrayAdapter<Content.PathMenuItem>(getActivity(),
+                android.R.layout.simple_list_item_1, android.R.id.text1, Content.ITEMS));
     }
 
 
@@ -86,7 +86,7 @@ public class PathMenuItemFragment extends ListFragment {
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(PathMenuContent.ITEMS.get(position).id);
+            mListener.onFragmentInteraction(Content.ITEMS.get(position).id);
         }
     }
 

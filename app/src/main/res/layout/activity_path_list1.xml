@@ -10,12 +10,14 @@
     android:weightSum="1">
     <TextView android:layout_width="fill_parent"
         android:layout_height="wrap_content" android:padding="10dp"
-        android:text="@string/some_text" android:textSize="20sp" />
+        android:text="@string/path_list_title" android:textSize="20sp" />
 
     <EditText android:id="@+id/pathsFilter" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:ems="10"
         android:hint="@string/some_hint">
+<!-- not sure why this was put here but it is annoying
         <requestFocus />
+  -->
     </EditText>
 
     <ListView android:id="@+id/listPaths"
@@ -36,6 +38,4 @@
         android:layout_weight="0"
         android:layout_gravity="right"
         android:onClick="onClick" />
-
-
 </LinearLayout>

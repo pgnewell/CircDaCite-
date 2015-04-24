@@ -23,15 +23,15 @@ import java.sql.SQLException;
 /**
  * Created by pgn on 1/5/15.
  */
-public class PathList extends ActionBarActivity {
-    private LocationsDbAdapter dbHelper;
+public class PathList1 extends ActionBarActivity {
+    private CdcDbAdapter dbHelper;
     private SimpleCursorAdapter dataAdapter;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dbHelper = new LocationsDbAdapter(this);
+        dbHelper = new CdcDbAdapter(this);
 
         try {
             dbHelper.open(false);
@@ -39,7 +39,7 @@ public class PathList extends ActionBarActivity {
             e.printStackTrace();
         }
 
-        setContentView(R.layout.activity_path_list);
+        setContentView(R.layout.activity_path_list1);
 
         //Generate ListView from SQLite Database
         displayListView();
@@ -74,7 +74,7 @@ public class PathList extends ActionBarActivity {
 
         // The desired columns to be bound
         String[] columns = new String[] {
-                LocationsDbAdapter.KEY_NAME,
+                CdcDbAdapter.KEY_NAME,
                 //LocationsDbAdapter.KEY_ADDRESS //
                 //LocationsDbAdapter.LOC_LAT,
                 //LocationsDbAdapter.LOC_LONG
@@ -153,7 +153,7 @@ public class PathList extends ActionBarActivity {
             case R.id.new_path_button:
                 Intent intent = new Intent(this, PathActivity.class);
 
-                startActivity(intent);
+                    startActivity(intent);
                 break;
             case R.id.locate_on_map:
                 break;

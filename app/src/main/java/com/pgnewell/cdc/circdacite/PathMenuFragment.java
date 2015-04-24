@@ -2,7 +2,6 @@ package com.pgnewell.cdc.circdacite;
 
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.pgnewell.cdc.circdacite.dummy.PathMenuContent;
+import com.pgnewell.cdc.circdacite.pathmenu.Content;
 
 /**
  * A fragment representing a list of Items.
@@ -75,8 +74,8 @@ public class PathMenuFragment extends DialogFragment implements AbsListView.OnIt
         }
 
         // TODO: Change Adapter to display your content
-        mAdapter = new ArrayAdapter<PathMenuContent.PathMenuItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, PathMenuContent.ITEMS);
+        mAdapter = new ArrayAdapter<Content.PathMenuItem>(getActivity(),
+                android.R.layout.simple_list_item_1, android.R.id.text1, Content.ITEMS);
     }
 
     @Override
@@ -117,7 +116,7 @@ public class PathMenuFragment extends DialogFragment implements AbsListView.OnIt
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(PathMenuContent.ITEMS.get(position).id);
+            mListener.onFragmentInteraction(Content.ITEMS.get(position).id);
         }
     }
 

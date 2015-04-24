@@ -78,7 +78,7 @@ public class ShowPath extends Fragment {
         View view = inflater.inflate(R.layout.fragment_show_path, container, false);
         mStartMapFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.start_loc_map))
                 .getMap();
-        mEndMapFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.start_loc_map))
+        mEndMapFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.end_loc_map))
                 .getMap();
 
         return view;

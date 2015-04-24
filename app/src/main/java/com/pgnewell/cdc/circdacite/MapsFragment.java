@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -39,7 +38,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.sql.SQLException;
-import java.util.List;
+
 import android.os.Handler;
 
 public class MapsFragment extends FragmentActivity implements
@@ -64,7 +63,7 @@ public class MapsFragment extends FragmentActivity implements
     private Marker mLastSelectedMarker;
 
     private TextView mTopText;
-    private LocationsDbAdapter dbHelper;
+    private CdcDbAdapter dbHelper;
     private Path mCurrentPath;
     LinearLayout pathFrame;
     EditText mCurrentPathName;
@@ -88,12 +87,13 @@ public class MapsFragment extends FragmentActivity implements
         mReceiver = new MyResultReceiver(new Handler());
         mReceiver.setReceiver(this);
 
+//      Don't remember what this all was for
 //        final Intent intent = new Intent(Intent.ACTION_SYNC, null, this, QueryService.class);
 //        intent.putExtra("receiver", mReceiver);
 //        intent.putExtra("command", "query");
 //        startService(intent);
 
-        dbHelper = new LocationsDbAdapter(this);
+        dbHelper = new CdcDbAdapter(this);
 
         try {
             dbHelper.open(true);
@@ -102,7 +102,8 @@ public class MapsFragment extends FragmentActivity implements
         }
 
         setUpMapIfNeeded();
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync( this );
     }
 
@@ -184,8 +185,10 @@ public class MapsFragment extends FragmentActivity implements
     }
 
     /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
+     * Add markers or lines for all the locations on file. If there are locations then create a map
+     * that scopes them all with the current location. Otherwise just use the current location.
+     * If it is not accessible use Kendall Square. Why Kendall Square? That's where I am right now.
+     * WTFN
      * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
@@ -332,6 +335,7 @@ public class MapsFragment extends FragmentActivity implements
                     pathSaveButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            mCurrentPath.setName(mCurrentPathName.getText().toString());
                             dbHelper.createPath(mCurrentPath);
                             pathFrame.setVisibility(View.GONE);
                         }

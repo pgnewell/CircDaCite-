@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.pgnewell.cdc.circdacite.PathList">
+    tools:context="com.pgnewell.cdc.circdacite.MainActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
     <item
@@ -9,6 +9,16 @@
         android:orderInCategory="200"
         app:showAsAction="never"
         android:title="@string/menu_db_dump"/>
+    <item
+        android:id="@+id/menu_path_list"
+        android:orderInCategory="200"
+        app:showAsAction="never"
+        android:title="@string/menu_path_list"/>
+    <item
+        android:id="@+id/menu_loc_list"
+        android:orderInCategory="200"
+        app:showAsAction="never"
+        android:title="@string/menu_loc_list"/>
     <item
         android:id="@+id/menu_legalnotices"
         android:orderInCategory="100"

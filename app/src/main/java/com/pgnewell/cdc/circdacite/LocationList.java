@@ -29,7 +29,7 @@ import java.sql.SQLException;
 
 
 public class LocationList extends ActionBarActivity {
-    private LocationsDbAdapter dbHelper;
+    private CdcDbAdapter dbHelper;
     private SimpleCursorAdapter dataAdapter;
     private ListView listView;
 
@@ -38,7 +38,7 @@ public class LocationList extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         listView = (ListView) findViewById(R.id.listLocations);
-        dbHelper = new LocationsDbAdapter(this);
+        dbHelper = new CdcDbAdapter(this);
 
         try {
             dbHelper.open(false);
@@ -68,6 +68,9 @@ public class LocationList extends ActionBarActivity {
         switch (item.getItemId()) {
             case R.id.action_settings:
                 return true;
+            case R.id.menu_db_dump:
+                dbHelper.dump(this);
+                return true;
             case R.id.menu_legalnotices:
                 String LicenseInfo = GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(
                         getApplicationContext());
@@ -86,10 +89,10 @@ public class LocationList extends ActionBarActivity {
 
         // The desired columns to be bound
         String[] columns = new String[] {
-                LocationsDbAdapter.KEY_NAME,
-                LocationsDbAdapter.KEY_NAME,
-                LocationsDbAdapter.KEY_ADDRESS,
-                LocationsDbAdapter.KEY_ADDRESS //
+                CdcDbAdapter.KEY_NAME,
+                CdcDbAdapter.KEY_NAME,
+                CdcDbAdapter.KEY_ADDRESS,
+                CdcDbAdapter.KEY_ADDRESS //
                 //LocationsDbAdapter.LOC_LAT,
                 //LocationsDbAdapter.LOC_LONG
         };
@@ -134,7 +137,6 @@ public class LocationList extends ActionBarActivity {
                 ViewGroup layout = (ViewGroup) view;
                 //layout.addView
 
-                // Get the state's capital from this row in the database.
                 String locationName =
                         cursor.getString(cursor.getColumnIndexOrThrow("name"));
                 Toast.makeText(getApplicationContext(),

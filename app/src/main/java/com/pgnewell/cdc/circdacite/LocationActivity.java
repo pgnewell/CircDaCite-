@@ -11,12 +11,12 @@ import java.sql.SQLException;
 
 
 public class LocationActivity extends ActionBarActivity {
-    private LocationsDbAdapter dbHelper;
+    private CdcDbAdapter dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dbHelper = new LocationsDbAdapter(this);
+        dbHelper = new CdcDbAdapter(this);
         try {
             dbHelper.open(true);
         } catch (SQLException e) {
