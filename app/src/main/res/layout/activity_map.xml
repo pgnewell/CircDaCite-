@@ -24,12 +24,10 @@
         android:id="@+id/top_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lines="2"
+        android:lines="10"
         android:text="@string/click_to_create_location"/>
 
     <!--
-        class="com.google.android.gms.maps.SupportMapFragment"/>
-    -->
     <LinearLayout
          android:orientation="horizontal"
          android:layout_width="match_parent"
@@ -47,6 +45,7 @@
             android:onClick="onResetMap"
             android:text="@string/locations_map"/>
     </LinearLayout>
+    -->
     <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -1,8 +1,9 @@
 package com.pgnewell.cdc.circdacite;
 
 import android.app.AlertDialog;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.database.Cursor;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -12,13 +13,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
 
 import java.sql.SQLException;
 
 public class MainActivity extends ActionBarActivity
-    implements PathFragment.OnFragmentInteractionListener {
+        implements PathFragment.OnFragmentInteractionListener,
+        SaveLocationFragment.SaveLocationDialogListener {
+
+    private final String LOG_TAG = MainActivity.class.getSimpleName();
     private CdcDbAdapter dbHelper;
     enum NextAction {path_list, location_list, settings};
     public Cursor paths;
@@ -73,11 +80,11 @@ public class MainActivity extends ActionBarActivity
                 dbHelper.dump(this);
                 return true;
             case R.id.menu_path_list:
-                FragmentManager fm = getFragmentManager();
+                FragmentManager fm = getSupportFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
 
-                PathFragment pf = new PathFragment();
-                ft.add(R.id.container, pf);
+                MapsFragment mf = new MapsFragment();
+                ft.add(R.id.container, mf);
                 ft.commit();
 
                 return true;
@@ -114,6 +121,32 @@ public class MainActivity extends ActionBarActivity
 
     public void onFragmentInteraction(String id) {
 
+    }
+
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        Bundle args = dialog.getArguments();
+        double locLat = args.getDouble(SaveLocationFragment.ARG_LATITUDE);
+        double locLong = args.getDouble(SaveLocationFragment.ARG_LONGITUDE);
+        // User touched the dialog's positive button
+        EditText locName = (EditText)
+                dialog.getDialog().findViewById(R.id.edit_location_name);
+        EditText locAddress = (EditText)
+                dialog.getDialog().findViewById(R.id.edit_location_address);
+        CDCLocation location = new CDCLocation(
+                locName.getText().toString(), locAddress.getText().toString(), locLat, locLong
+        );
+        dbHelper.createLocation(location);
+//        mMap.addMarker(new MarkerOptions()
+//                        .position(location.getLatLng())
+//                        .title(location.getName())
+//                        .snippet(location.getAddress())
+        //);
+
+    }
+
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // User touched the dialog's negative button
+        dialog.getDialog().cancel();
     }
 
 }

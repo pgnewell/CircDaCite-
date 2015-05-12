@@ -1,6 +1,7 @@
 package com.pgnewell.cdc.circdacite;
 
 import android.app.Activity;
+import android.support.v4.app.FragmentActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;

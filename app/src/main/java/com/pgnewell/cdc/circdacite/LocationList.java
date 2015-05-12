@@ -24,6 +24,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ViewSwitcher;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
 
 import java.sql.SQLException;
 

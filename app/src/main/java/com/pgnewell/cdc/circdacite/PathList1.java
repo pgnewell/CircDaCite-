@@ -18,6 +18,8 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
+import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
+
 import java.sql.SQLException;
 
 /**

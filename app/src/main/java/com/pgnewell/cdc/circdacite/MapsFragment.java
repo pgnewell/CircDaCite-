@@ -1,8 +1,10 @@
 package com.pgnewell.cdc.circdacite;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -10,11 +12,14 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,12 +41,11 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
 
 import java.sql.SQLException;
 
-import android.os.Handler;
-
-public class MapsFragment extends FragmentActivity implements
+public class MapsFragment extends Fragment implements
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMarkerDragListener,
@@ -65,35 +69,37 @@ public class MapsFragment extends FragmentActivity implements
     private TextView mTopText;
     private CdcDbAdapter dbHelper;
     private Path mCurrentPath;
-    LinearLayout pathFrame;
+    LinearLayout mPathFrame;
     EditText mCurrentPathName;
-    Button pathSaveButton;
+    Button mPathSaveButton;
     private BitmapDescriptor mStartMarker;
-    MyResultReceiver mReceiver;
+
+    public static MapsFragment newInstance(String param1, String param2) {
+        MapsFragment fragment = new MapsFragment();
+//        Bundle args = new Bundle();
+//        args.putString(ARG_PARAM1, param1);
+//        args.putString(ARG_PARAM2, param2);
+//        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /**
+     * Mandatory empty constructor
+     */
+    public MapsFragment() {
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        mTopText = (TextView) findViewById(R.id.top_text);
-        pathFrame = (LinearLayout)
-                this.findViewById(R.id.path_frame);
-        mCurrentPathName = (EditText)
-                this.findViewById(R.id.new_path_name);
-        mStartMarker =
-                BitmapDescriptorFactory.fromResource(R.drawable.start_marker);
-        pathSaveButton = (Button) MapsFragment.this.findViewById(R.id.path_save_button);
 
-        mReceiver = new MyResultReceiver(new Handler());
-        mReceiver.setReceiver(this);
+//        If we needed this stuff but we don't yet ARG_PARAM* are constants
+//        if (getArguments() != null) {
+//            mParam1 = getArguments().getString(ARG_PARAM1);
+//            mParam2 = getArguments().getString(ARG_PARAM2);
+//        }
 
-//      Don't remember what this all was for
-//        final Intent intent = new Intent(Intent.ACTION_SYNC, null, this, QueryService.class);
-//        intent.putExtra("receiver", mReceiver);
-//        intent.putExtra("command", "query");
-//        startService(intent);
-
-        dbHelper = new CdcDbAdapter(this);
+        dbHelper = new CdcDbAdapter(getActivity());
 
         try {
             dbHelper.open(true);
@@ -101,14 +107,30 @@ public class MapsFragment extends FragmentActivity implements
             e.printStackTrace();
         }
 
-        setUpMapIfNeeded();
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync( this );
     }
 
     @Override
-    protected void onResume() {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_map, container, false);
+        mTopText = (TextView) view.findViewById(R.id.top_text);
+        mPathFrame = (LinearLayout)
+                view.findViewById(R.id.path_frame);
+        mCurrentPathName = (EditText)
+                view.findViewById(R.id.new_path_name);
+        mPathSaveButton = (Button) view.findViewById(R.id.path_save_button);
+
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getChildFragmentManager()
+                        .findFragmentById(R.id.map);
+        mapFragment.getMapAsync( this );
+        setUpMapIfNeeded();
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
         super.onResume();
         setUpMapIfNeeded();
     }
@@ -118,10 +140,10 @@ public class MapsFragment extends FragmentActivity implements
         // "title" and "snippet".
         private final View mWindow;
         private final View mContents;
-
+        Activity act = getActivity();
         CustomInfoWindowAdapter() {
-            mWindow = getLayoutInflater().inflate(R.layout.location_info_window, null);
-            mContents = getLayoutInflater().inflate(R.layout.location_info_contents, null);
+            mWindow = act.getLayoutInflater().inflate(R.layout.location_info_window, null);
+            mContents = act.getLayoutInflater().inflate(R.layout.location_info_contents, null);
         }
 
         @Override
@@ -175,7 +197,8 @@ public class MapsFragment extends FragmentActivity implements
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+            mMap = ((SupportMapFragment) getChildFragmentManager()
+                    .findFragmentById(R.id.map))
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
@@ -193,9 +216,10 @@ public class MapsFragment extends FragmentActivity implements
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
+        final Activity act = getActivity();
         LatLng ll = KENDALL;
         mMap.setMyLocationEnabled(true);
-        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        LocationManager lm = (LocationManager) act.getSystemService(Context.LOCATION_SERVICE);
         Criteria c = new Criteria();
         String p = lm.getBestProvider(c, true);
 
@@ -211,7 +235,7 @@ public class MapsFragment extends FragmentActivity implements
             public void onMapClick(LatLng position) {
                 //mMap.addMarker(new MarkerOptions().position(position).title("New location"));
                 DialogFragment dialog = SaveLocationFragment.newInstance(position);
-                dialog.show(getFragmentManager(), "SaveLocation");
+                dialog.show(act.getFragmentManager(), "SaveLocation");
                 // mMap.setOnMarkerDragListener( );
                 //path.add(new PathLocation(position, current_type, ""));
 
@@ -244,9 +268,14 @@ public class MapsFragment extends FragmentActivity implements
         // Ideally this string would be localised.
         map.setContentDescription("Map with lots of markers.");
 
+        mStartMarker =
+                BitmapDescriptorFactory.fromResource(R.drawable.start_marker);
+
         // Pan to see all markers in view.
         // Cannot zoom to bounds until the map has a size.
-        final View mapView = getSupportFragmentManager().findFragmentById(R.id.map).getView();
+        final View mapView = getChildFragmentManager()
+                .findFragmentById(R.id.map)
+                .getView();
         if (mapView.getViewTreeObserver().isAlive()) {
             mapView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @SuppressWarnings("deprecation") // We use the new method when supported
@@ -303,7 +332,7 @@ public class MapsFragment extends FragmentActivity implements
     public void onInfoWindowClick(final Marker marker) {
         String title = marker.getTitle().toString();
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final double lat = marker.getPosition().latitude;
         final double lng = marker.getPosition().longitude;
         final CDCLocation loc;
@@ -332,12 +361,12 @@ public class MapsFragment extends FragmentActivity implements
             builder.setItems(drop_menu, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
 
-                    pathSaveButton.setOnClickListener(new View.OnClickListener() {
+                    mPathSaveButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             mCurrentPath.setName(mCurrentPathName.getText().toString());
                             dbHelper.createPath(mCurrentPath);
-                            pathFrame.setVisibility(View.GONE);
+                            mPathFrame.setVisibility(View.GONE);
                         }
                     });
                     switch (act_map[which]) {
@@ -346,12 +375,12 @@ public class MapsFragment extends FragmentActivity implements
                             mCurrentPath = new Path(mCurrentPathName.getText().toString());
                             mCurrentPath.addLocation(loc);
                             marker.setIcon(mStartMarker);
-                            pathFrame.setVisibility(View.VISIBLE);
+                            mPathFrame.setVisibility(View.VISIBLE);
                             break;
                         // add to an existing path
                         case ADD_TO_PATH:
                             mCurrentPath.addLocation(loc);
-                            pathFrame.setVisibility(View.VISIBLE);
+                            mPathFrame.setVisibility(View.VISIBLE);
                             mMap.addPolyline(new PolylineOptions()).setPoints(mCurrentPath.latLngs());
                             break;
                         // remove the location from the map
@@ -435,7 +464,7 @@ public class MapsFragment extends FragmentActivity implements
 
     private boolean checkReady() {
         if (mMap == null) {
-            Toast.makeText(this, R.string.map_not_ready, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.map_not_ready, Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -468,16 +497,16 @@ public class MapsFragment extends FragmentActivity implements
 //    private final class PathMenuOnClickListener implements
 //            DialogInterface.OnClickListener {
 //        public void onClick(DialogInterface dialog, int which) {
-//            LinearLayout pathFrame = (LinearLayout)
+//            LinearLayout mPathFrame = (LinearLayout)
 //                    MapsFragment.this.findViewById(R.id.path_frame);
 //            switch (which) {
 //                case 0:
 //                    mCurrentPath = new Path(mCurrentPathName.getText().toString());
 //                case 1:
-//                    pathFrame.setVisibility(View.GONE);
+//                    mPathFrame.setVisibility(View.GONE);
 //                    break;
 //                case 2:
-//                    pathFrame.setVisibility(View.VISIBLE);
+//                    mPathFrame.setVisibility(View.VISIBLE);
 //                    break;
 //            }
 //
