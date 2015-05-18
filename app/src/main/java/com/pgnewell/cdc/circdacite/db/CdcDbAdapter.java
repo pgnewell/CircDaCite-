@@ -57,15 +57,16 @@ public class CdcDbAdapter {
 
     protected final Context mCtx;
 
-    private static class DatabaseHelper extends SQLiteOpenHelper {
+    public static class DatabaseHelper extends SQLiteOpenHelper {
 
         private Context ctx;
         private String createText;
         private int[] createFiles = {
-                android.R.raw
+                R.raw.create_db_loc,
                 R.raw.create_db_paths,
                 R.raw.create_db_paths_loc,
                 R.raw.create_db_paths_view,
+                R.raw.create_db_bike_stations,
                 R.raw.insert_loc_db};
         private int dropFiles = R.raw.drop_db;
         private String dropText = "";
@@ -97,12 +98,11 @@ public class CdcDbAdapter {
             execSQL(db, createText);
         }
 
-        // Doesn't work if there are any embedded ';'s
+        // Doesn't work if there are any embedded ';'s split accordingly into commands
         private void execSQL(SQLiteDatabase db, String command) {
             String[] statements = (String[]) command.split(";");
-            int idx;
             for (String statement : statements ) {
-                Log.w(TAG, statement);
+                //Log.w(TAG, statement);
                 if (!statement.trim().isEmpty())
                     db.execSQL(statement);
             }
@@ -175,7 +175,7 @@ public class CdcDbAdapter {
 
         int doneDelete = 0;
         doneDelete = mDb.delete(LOCATIONS_TABLE, null , null);
-        Log.w(TAG, Integer.toString(doneDelete));
+        Log.w(TAG, Integer.toString(doneDelete) + " records deleted");
         return doneDelete > 0;
 
     }

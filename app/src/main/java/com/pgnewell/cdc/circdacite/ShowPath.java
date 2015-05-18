@@ -76,10 +76,12 @@ public class ShowPath extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_show_path, container, false);
-        mStartMapFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.start_loc_map))
-                .getMap();
-        mEndMapFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.end_loc_map))
-                .getMap();
+// this is being removed while the display is simplified to adapt to the Cursor Loader/
+// Content Provider approach.
+//        mStartMapFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.start_loc_map))
+//                .getMap();
+//        mEndMapFrag = ((MapFragment) getFragmentManager().findFragmentById(R.id.end_loc_map))
+//                .getMap();
 
         return view;
     }

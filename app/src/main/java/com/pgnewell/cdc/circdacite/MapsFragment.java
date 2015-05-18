@@ -50,8 +50,7 @@ public class MapsFragment extends Fragment implements
         GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMarkerDragListener,
         OnMapReadyCallback,
-        SaveLocationFragment.SaveLocationDialogListener,
-        MyResultReceiver.Receiver {
+        SaveLocationFragment.SaveLocationDialogListener {
 
     private static final LatLng KENDALL = new LatLng(42.3628735,-71.0900971);
     private static enum PathCommands {
@@ -513,19 +512,4 @@ public class MapsFragment extends Fragment implements
 //            dialog.dismiss();
 //        }
 //    }
-    public void onReceiveResult(int resultCode, Bundle resultData) {
-        switch (resultCode) {
-            case 1:
-                //show progress
-                break;
-            case 2:
-                //List results = resultData.getParcelableList("results");
-                // do something interesting
-                // hide progress
-                break;
-            case 3:
-                // handle the error;
-                break;
-        }
-    }
 }

@@ -34,10 +34,10 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
+ <!--       <activity
             android:name=".MapsFragment"
             android:label="@string/title_activity_maps" >
-        </activity>
+        </activity>-->
         <activity
             android:name=".PathList1"
             android:label="@string/title_activity_path" >
@@ -47,9 +47,17 @@
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
+        <provider
+            android:authorities="com.pgnewell.cdc.circdacite"
+            android:name=".db.CdcProvider" />
     </application>
 
 </manifest>

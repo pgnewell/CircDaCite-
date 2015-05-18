@@ -22,6 +22,8 @@ public class CdcContract {
     // as the ContentProvider hasn't been given any information on what to do with "givemeroot".
     // At least, let's hope not.  Don't be that dev, reader.  Don't be that dev.
     public static final String PATH_LOCATION = "location";
+    public static final String PATH_PATH_LOCATION = "path-location";
+    public static final String PATH_PATH_VIEW = "path-view";
     public static final String PATH_BIKE_STATION = "bike-station";
     public static final String PATH_PATH = "path";
 
@@ -71,6 +73,9 @@ public class CdcContract {
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_PATH;
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_PATH;
+        public static Uri buildPathUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
     }
 
     public static final class PathLocationEntry implements BaseColumns {
@@ -89,40 +94,32 @@ public class CdcContract {
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
 
+    }
 
-        public static Uri buildLocationUri(long id) {
-            return ContentUris.withAppendedId(CONTENT_URI, id);
-        }
+    public static final class PathViewEntry implements BaseColumns {
+        public static final String TABLE_NAME = "paths_view";
+        public static final String COLUMN_ID = "_id"; // WTF?? Yes we require this
+        public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_START_LOC = "start_loc";
+        public static final String COLUMN_END_LOC = "end_loc";
+        public static final String COLUMN_START_LAT = "start_loc_lat";
+        public static final String COLUMN_END_LAT = "end_loc_lat";
+        public static final String COLUMN_START_LON = "start_loc_lon";
+        public static final String COLUMN_END_LON = "end_loc_lon";
 
-        public static Uri buildWeatherLocationWithStartDate(
-                String locationSetting, long startDate) {
-            long normalizedDate = normalizeDate(startDate);
-            return CONTENT_URI.buildUpon().appendPath(locationSetting)
-                    .appendQueryParameter(COLUMN_DATE, Long.toString(normalizedDate)).build();
-        }
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION).build();
 
-        public static Uri buildWeatherLocationWithDate(String locationSetting, long date) {
-            return CONTENT_URI.buildUpon().appendPath(locationSetting)
-                    .appendPath(Long.toString(normalizeDate(date))).build();
-        }
+        public static final String CONTENT_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
+        public static final String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
 
-        public static String getLocationSettingFromUri(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
-
-        public static long getDateFromUri(Uri uri) {
-            return Long.parseLong(uri.getPathSegments().get(2));
-        }
-
-        public static long getStartDateFromUri(Uri uri) {
-            String dateString = uri.getQueryParameter(COLUMN_DATE);
-            if (null != dateString && dateString.length() > 0)
-                return Long.parseLong(dateString);
-            else
-                return 0;
-        }    }
+    }
 
     public static final class BikeStationEntry implements BaseColumns {
+        public static final String TABLE_NAME = "bike_stations";
+
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_BIKE_STATION).build();
 
@@ -147,8 +144,9 @@ public class CdcContract {
                         "/" + CONTENT_AUTHORITY +
                         "/" + PATH_BIKE_STATION;
 
+        public static Uri buildPathUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
     }
-
-
 
 }

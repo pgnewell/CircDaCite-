@@ -2,6 +2,7 @@ package com.pgnewell.cdc.circdacite;
 
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.database.Cursor;
@@ -16,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
 
 import java.sql.SQLException;
@@ -31,6 +31,7 @@ public class MainActivity extends ActionBarActivity
     public Cursor paths;
     public Cursor locations;
     public Cursor path_view;
+    private final String PATH_FRAGMENT_TAG = "PTHFRG";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,17 +76,26 @@ public class MainActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_settings:
+                Intent sendIntent = new Intent(this, SettingsActivity.class);
+                startActivity(sendIntent);
                 return true;
             case R.id.menu_db_dump:
                 dbHelper.dump(this);
                 return true;
             case R.id.menu_path_list:
-                FragmentManager fm = getSupportFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
+                //Here is where we are doing fragments but following
+                // the course we are doing and activity
+//                FragmentManager fm = getSupportFragmentManager();
+//                FragmentTransaction ft = fm.beginTransaction();
+//
+//                MapsFragment mf = new MapsFragment();
+//                ft.add(R.id.container, mf);
+//                ft.commit();
+                // Instead do this:
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.container, new PathFragment(), PATH_FRAGMENT_TAG)
+                        .commit();
 
-                MapsFragment mf = new MapsFragment();
-                ft.add(R.id.container, mf);
-                ft.commit();
 
                 return true;
             case R.id.menu_loc_list:

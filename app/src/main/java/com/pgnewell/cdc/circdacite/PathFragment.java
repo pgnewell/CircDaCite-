@@ -1,18 +1,22 @@
 package com.pgnewell.cdc.circdacite;
 
 import android.app.Activity;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
+import com.pgnewell.cdc.circdacite.db.CdcContract;
 import com.pgnewell.cdc.circdacite.dummy.DummyContent;
 
 /**
@@ -24,16 +28,45 @@ import com.pgnewell.cdc.circdacite.dummy.DummyContent;
  * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
  * interface.
  */
-public class PathFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class PathFragment extends Fragment implements AbsListView.OnItemClickListener,
+        LoaderManager.LoaderCallbacks<Cursor>{
+
+    private static final String[] PATH_VIEW_COLUMNS = {
+            // In this case the id needs to be fully qualified with a table name, since
+            // the content provider joins the location & weather tables in the background
+            // (both have an _id column)
+            // On the one hand, that's annoying.  On the other, you can search the weather table
+            // using the location set by the user, which is only in the Location table.
+            // So the convenience is worth it.
+            CdcContract.PathViewEntry._ID,
+            CdcContract.PathViewEntry.COLUMN_NAME,
+            CdcContract.PathViewEntry.COLUMN_START_LOC,
+            CdcContract.PathViewEntry.COLUMN_START_LAT,
+            CdcContract.PathViewEntry.COLUMN_START_LON,
+            CdcContract.PathViewEntry.COLUMN_END_LOC,
+            CdcContract.PathViewEntry.COLUMN_END_LAT,
+            CdcContract.PathViewEntry.COLUMN_END_LON
+    };
+
+    // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
+    // must change.
+    static final int COL_ID = 0;
+    static final int COL_NAME = 1;
+    static final int COL_START_LOC = 2;
+    static final int COL_START_LAT = 3;
+    static final int COL_START_LON = 4;
+    static final int COL_END_LOC = 5;
+    static final int COL_END_LAT = 6;
+    static final int COL_END_LON = 7;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_LAT = "latitude";
+    private static final String ARG_LONG = "longitude";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private double mLatitude;
+    private double mLongitude;
 
     private OnFragmentInteractionListener mListener;
 
@@ -46,14 +79,14 @@ public class PathFragment extends Fragment implements AbsListView.OnItemClickLis
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private PathsAdapter mAdapter;
 
     // TODO: Rename and change types of parameters
-    public static PathFragment newInstance(String param1, String param2) {
+    public static PathFragment newInstance(double latitude, double longitude) {
         PathFragment fragment = new PathFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putDouble(ARG_LAT, latitude);
+        args.putDouble(ARG_LONG, longitude);
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,39 +98,74 @@ public class PathFragment extends Fragment implements AbsListView.OnItemClickLis
     }
 
     @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        String sortOrder =
+                "((" + CdcContract.PathViewEntry.COLUMN_START_LAT + " - ?) ** 2 + " +
+                " (" + CdcContract.PathViewEntry.COLUMN_END_LAT + " - ?) ** 2) ** .5" +
+                        " ASC";
+        Uri pathViewUri = CdcContract.PathViewEntry.CONTENT_URI;
+
+        return new CursorLoader(
+                getActivity(),
+                pathViewUri,
+                PATH_VIEW_COLUMNS, null, null,
+                sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mLatitude = getArguments().getDouble(ARG_LAT);
+            mLongitude = getArguments().getDouble(ARG_LONG);
         }
 
-        String[] columns = new String[]{
-                CdcDbAdapter.KEY_NAME,
-                CdcDbAdapter.PL_START,
-                CdcDbAdapter.PL_END
-        };
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
-        int[] to = new int[] {
-                R.id.path_name,
-                R.id.start_loc,
-                R.id.end_loc
-        };
-        MainActivity act = (MainActivity) getActivity();
-        // TODO: Change Adapter to display your content
-        mAdapter = new SimpleCursorAdapter(
-                act, R.layout.fragment_show_path,
-                act.path_view,
-                columns,
-                to,
-                0);
+        updateBikeStations();
+        // removed as a result of aligning with the Android course.
+        // not sure where this is going but this will simplify the display while pushing the
+        // details to PathsAdapter.
+//        String[] columns = new String[]{
+//                CdcDbAdapter.KEY_NAME,
+//                CdcDbAdapter.PL_START,
+//                CdcDbAdapter.PL_END
+//        };
+//
+//        int[] to = new int[] {
+//                R.id.path_name,
+//                R.id.start_loc,
+//                R.id.end_loc
+//        };
+//        MainActivity act = (MainActivity) getActivity();
+//        // TODO: Change Adapter to display your content
+//        mAdapter = new SimpleCursorAdapter(
+//                act, R.layout.fragment_show_path,
+//                act.path_view,
+//                columns,
+//                to,
+//                0);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_path, container, false);
+        mAdapter = new PathsAdapter(getActivity(), null, 0);
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -162,6 +230,15 @@ public class PathFragment extends Fragment implements AbsListView.OnItemClickLis
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(String id);
+    }
+
+    private void updateBikeStations() {
+
+        FetchBikeStationTask stationTask = new FetchBikeStationTask(getActivity());
+        //TODO: replace with Settings value
+        String url = getResources().getString(R.string.hubway_uri);
+
+        stationTask.execute(url);
     }
 
 }

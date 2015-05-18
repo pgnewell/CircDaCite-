@@ -1,3 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:id="@+id/list_item_forecast_textview"
+    android:gravity="center_vertical">
+
+</TextView>
+<!--
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -5,8 +14,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.pgnewell.cdc.circdacite.ShowPath">
-
-    <!-- TODO: Update blank fragment layout -->
 
     <LinearLayout
         android:orientation="horizontal"
@@ -94,3 +101,4 @@
     </TableLayout>
 
 </LinearLayout>
+-->

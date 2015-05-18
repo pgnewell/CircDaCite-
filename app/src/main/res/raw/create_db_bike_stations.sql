@@ -1,4 +1,4 @@
-CREATE TABLE if not exists locations (
+CREATE TABLE if not exists bike_stations (
         _id integer PRIMARY KEY autoincrement,
         id integer, -- the BIXI id needs to be separate for stoopid reasons.
         name varchar(255),
