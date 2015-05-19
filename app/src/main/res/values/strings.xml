@@ -70,5 +70,6 @@
     <string name="menu_path_list">Paths List</string>
     <string name="menu_loc_list">Location List</string>
     <string name="hubway_uri">https://www.thehubway.com/data/stations/bikeStations.xml</string>
+    <string name="menu_calendar">Refresh Calendar</string>
 
 </resources>

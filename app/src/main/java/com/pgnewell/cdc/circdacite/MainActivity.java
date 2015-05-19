@@ -18,6 +18,7 @@ import android.widget.EditText;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
+import com.pgnewell.cdc.circdacite.google.CalendarTask;
 
 import java.sql.SQLException;
 
@@ -81,6 +82,9 @@ public class MainActivity extends ActionBarActivity
                 return true;
             case R.id.menu_db_dump:
                 dbHelper.dump(this);
+                return true;
+            case R.id.menu_calendar:
+                CalendarTask ct = new CalendarTask(getApplicationContext());
                 return true;
             case R.id.menu_path_list:
                 //Here is where we are doing fragments but following

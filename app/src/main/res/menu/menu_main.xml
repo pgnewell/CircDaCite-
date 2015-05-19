@@ -15,6 +15,11 @@
         app:showAsAction="never"
         android:title="@string/menu_path_list"/>
     <item
+        android:id="@+id/menu_calendar"
+        android:orderInCategory="200"
+        app:showAsAction="never"
+        android:title="@string/menu_calendar"/>
+    <item
         android:id="@+id/menu_loc_list"
         android:orderInCategory="200"
         app:showAsAction="never"
