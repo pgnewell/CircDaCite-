@@ -4,7 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CircDaCité.iml" filepath="$PROJECT_DIR$/CircDaCité.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/com.google.ical/com.google.ical.iml" filepath="$PROJECT_DIR$/com.google.ical/com.google.ical.iml" />
+      <module fileurl="file://$PROJECT_DIR$/joda-time/joda-time.iml" filepath="$PROJECT_DIR$/joda-time/joda-time.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib/lib.iml" filepath="$PROJECT_DIR$/lib/lib.iml" />
     </modules>
   </component>
 </project>
-

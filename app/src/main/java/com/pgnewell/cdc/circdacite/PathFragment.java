@@ -100,16 +100,19 @@ public class PathFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
+        double lat = args.getDouble(ARG_LAT);
+        double lon = args.getDouble(ARG_LONG);
+        String[] dArgs = {Double.toString(lat),Double.toString(lon)};
         String sortOrder =
                 "((" + CdcContract.PathViewEntry.COLUMN_START_LAT + " - ?) ** 2 + " +
-                " (" + CdcContract.PathViewEntry.COLUMN_END_LAT + " - ?) ** 2) ** .5" +
+                " (" + CdcContract.PathViewEntry.COLUMN_START_LON + " - ?) ** 2) ** .5" +
                         " ASC";
         Uri pathViewUri = CdcContract.PathViewEntry.CONTENT_URI;
 
         return new CursorLoader(
                 getActivity(),
                 pathViewUri,
-                PATH_VIEW_COLUMNS, null, null,
+                PATH_VIEW_COLUMNS, null, dArgs,
                 sortOrder);
     }
 

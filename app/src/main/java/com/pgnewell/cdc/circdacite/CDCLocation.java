@@ -39,6 +39,11 @@ public class CDCLocation {
         setLocation(context);
     }
 
+    public CDCLocation(String name, double latitude, double longitude, Context context) {
+        this.name = name;
+        this.latLng = new LatLng(latitude,longitude);
+        setAddress(context);
+    }
     public long getId() {
         return id;
     }
@@ -93,7 +98,7 @@ public class CDCLocation {
 
                 for (int idx=0; idx< 3; idx++ ) {
                     list = gc.getFromLocationName(address, 1);
-                    if (list != null) {
+                    if (list != null && list.size() > 0) {
                         Address add = list.get(0);
                         this.latLng = new LatLng(add.getLongitude(),add.getLatitude());
                         break;
@@ -106,6 +111,29 @@ public class CDCLocation {
         }
 
     }
+    public void setAddress(Context context) {
+        if(Geocoder.isPresent()){
+            Geocoder gc = new Geocoder(context);
+            try {
+                List<Address> list;
+
+
+                for (int idx=0; idx< 3; idx++ ) {
+                    list = gc.getFromLocation(latLng.latitude, latLng.longitude, 1);
+                    if (list != null) {
+                        Address add = list.get(0);
+                        this.address = add.toString();
+                        break;
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     public static CDCLocation extract( Cursor cursor ) {
         CDCLocation loc = new CDCLocation(
             cursor.getInt(0),

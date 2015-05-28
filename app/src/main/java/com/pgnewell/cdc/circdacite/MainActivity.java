@@ -3,8 +3,6 @@ package com.pgnewell.cdc.circdacite;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.Intent;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.database.Cursor;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -21,6 +19,9 @@ import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
 import com.pgnewell.cdc.circdacite.google.CalendarTask;
 
 import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity
         implements PathFragment.OnFragmentInteractionListener,
@@ -32,6 +33,7 @@ public class MainActivity extends ActionBarActivity
     public Cursor paths;
     public Cursor locations;
     public Cursor path_view;
+    public List<CalendarTask.CalEvent> mCalendarEvents;
     private final String PATH_FRAGMENT_TAG = "PTHFRG";
 
     @Override
@@ -84,7 +86,9 @@ public class MainActivity extends ActionBarActivity
                 dbHelper.dump(this);
                 return true;
             case R.id.menu_calendar:
-                CalendarTask ct = new CalendarTask(getApplicationContext());
+                long now = Calendar.getInstance().getTimeInMillis();
+                long then = Calendar.getInstance().getTimeInMillis() + 3*1000*60*60;
+                mCalendarEvents = CalendarTask.PendingEventsWithLocations(this,now,then);
                 return true;
             case R.id.menu_path_list:
                 //Here is where we are doing fragments but following
