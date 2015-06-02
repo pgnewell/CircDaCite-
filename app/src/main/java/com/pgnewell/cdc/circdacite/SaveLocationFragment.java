@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.support.v4.app.FragmentActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,12 +31,9 @@ public class SaveLocationFragment extends DialogFragment {
         public void onDialogNegativeClick(DialogFragment dialog);
     }
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     public static final String ARG_LATITUDE = "latitude";
     public static final String ARG_LONGITUDE = "longitude";
 
-    // TODO: Rename and change types of parameters
     private String mLocName;
     private String mLocAddress;
 

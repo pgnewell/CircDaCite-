@@ -239,7 +239,7 @@ public class PathFragment extends Fragment implements AbsListView.OnItemClickLis
 
         FetchBikeStationTask stationTask = new FetchBikeStationTask(getActivity());
         //TODO: replace with Settings value
-        String url = getResources().getString(R.string.hubway_uri);
+        String url = getResources().getString(R.string.hubway_xml_uri);
 
         stationTask.execute(url);
     }

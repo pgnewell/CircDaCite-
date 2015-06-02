@@ -39,4 +39,23 @@ public class BixiContract {
                         "/" + PATH_BIKE_STATIONS;
 
     }
+    public static final class BikeStationTags {
+        public static final String TAG_ID = "id";
+        public static final String TAG_NAME = "s";
+        public static final String TAG_TERMINAL_NAME = "n";
+        public static final String TAG_STATUS = "st";
+        public static final String TAG_SOMETHING = "b";
+        public static final String TAG_LOCKED = "su";
+        public static final String TAG_INSTALLED = "m";
+        public static final String TAG_LATEST_UPDATE_TIME = "lu";
+        public static final String TAG_LAST_COMM_WITH_SERVER = "lc";
+        public static final String TAG_REMOVAL_DATE = "bk";
+        public static final String TAG_TEMPORARY = "bl";
+        public static final String TAG_LAT = "la";
+        public static final String TAG_LONG = "lo";
+        public static final String TAG_NB_EMPTY_DOCKS = "da";
+        public static final String TAG_DOCKS_DX= "dx";
+        public static final String TAG_NB_BIKES = "ba";
+        public static final String TAG_BIKES_DX = "bx";
+    }
 }

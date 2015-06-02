@@ -86,21 +86,26 @@ public class Station {
                 case BikeStationEntry.COLUMN_INSTALL_DATE:
                 case BikeStationEntry.COLUMN_LATEST_UPDATE_TIME:
                 case BikeStationEntry.COLUMN_LAST_COMM_WITH_SERVER:
-                    stationValues.put(elName,readLong(text));
+                    stationValues.put(elName,readLong(text)); break;
+
                 case BikeStationEntry.COLUMN_NAME:
                 case BikeStationEntry.COLUMN_TERMINAL_NAME:
                     stationValues.put(elName,text); break;
+
                 case BikeStationEntry.COLUMN_LAT:
                 case BikeStationEntry.COLUMN_LONG:
                     stationValues.put(elName,readDouble(text)); break;
+
                 case BikeStationEntry.COLUMN_LOCKED:
                 case BikeStationEntry.COLUMN_TEMPORARY:
                 case BikeStationEntry.COLUMN_PUBLIC:
                 case BikeStationEntry.COLUMN_INSTALLED:
                     stationValues.put(elName,readBoolean(text)); break;
+
                 case BikeStationEntry.COLUMN_NB_BIKES:
                 case BikeStationEntry.COLUMN_NB_EMPTY_DOCKS:
                     stationValues.put(elName,readInt(text)); break;
+
                 default:
                     skip(parser);
             }

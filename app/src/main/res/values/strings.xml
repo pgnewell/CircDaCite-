@@ -66,10 +66,11 @@
     <string name="menu_db_dump">DB dump</string>
     <string name="path_list_title">Paths!</string>
     <string name="title_activity_path_list">PathList</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Circ Da Cité</string>
     <string name="menu_path_list">Paths List</string>
     <string name="menu_loc_list">Location List</string>
-    <string name="hubway_uri">https://www.thehubway.com/data/stations/bikeStations.xml</string>
+    <string name="hubway_xml_uri">https://www.thehubway.com/data/stations/bikeStations.xml</string>
+    <string name="hubway_json_uri">https://www.thehubway.com/data/stations/bikeStations.json</string>
     <string name="menu_calendar">Refresh Calendar</string>
 
 </resources>

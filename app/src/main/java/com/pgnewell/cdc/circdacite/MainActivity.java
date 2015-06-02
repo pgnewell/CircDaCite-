@@ -1,7 +1,8 @@
 package com.pgnewell.cdc.circdacite;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.ActionBarActivity;
@@ -16,11 +17,11 @@ import android.widget.EditText;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.pgnewell.cdc.circdacite.db.CdcDbAdapter;
+import com.pgnewell.cdc.circdacite.google.CalendarEventsTask;
 import com.pgnewell.cdc.circdacite.google.CalendarTask;
 
 import java.sql.SQLException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity
@@ -33,8 +34,10 @@ public class MainActivity extends ActionBarActivity
     public Cursor paths;
     public Cursor locations;
     public Cursor path_view;
-    public List<CalendarTask.CalEvent> mCalendarEvents;
+    public List<CalendarEventsTask.CalEvent> mCalendarEvents;
     private final String PATH_FRAGMENT_TAG = "PTHFRG";
+    private final String MAPS_FRAGMENT_TAG = "MAPFRG";
+    private List<ContentValues> mCalendars;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +49,9 @@ public class MainActivity extends ActionBarActivity
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        CalendarTask ct = new CalendarTask(this);
+        mCalendars = ct.CalendarList();
 
         NextAction action;
         locations = dbHelper.fetchAllLocations();
@@ -88,7 +94,8 @@ public class MainActivity extends ActionBarActivity
             case R.id.menu_calendar:
                 long now = Calendar.getInstance().getTimeInMillis();
                 long then = Calendar.getInstance().getTimeInMillis() + 3*1000*60*60;
-                mCalendarEvents = CalendarTask.PendingEventsWithLocations(this,now,then);
+                CalendarEventsTask cet = new CalendarEventsTask(this);
+                mCalendarEvents = cet.PendingEventsWithLocations(now, then);
                 return true;
             case R.id.menu_path_list:
                 //Here is where we are doing fragments but following
@@ -107,6 +114,9 @@ public class MainActivity extends ActionBarActivity
 
                 return true;
             case R.id.menu_loc_list:
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.container, new MapsFragment(), MAPS_FRAGMENT_TAG)
+                        .commit();
                 return true;
             case R.id.menu_legalnotices:
                 String LicenseInfo = GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(

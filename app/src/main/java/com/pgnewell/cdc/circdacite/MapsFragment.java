@@ -3,7 +3,7 @@ package com.pgnewell.cdc.circdacite;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -13,7 +13,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -234,7 +234,8 @@ public class MapsFragment extends Fragment implements
             public void onMapClick(LatLng position) {
                 //mMap.addMarker(new MarkerOptions().position(position).title("New location"));
                 DialogFragment dialog = SaveLocationFragment.newInstance(position);
-                dialog.show(act.getFragmentManager(), "SaveLocation");
+                FragmentManager fm = getFragmentManager();
+                dialog.show(fm, "SaveLocation");
                 // mMap.setOnMarkerDragListener( );
                 //path.add(new PathLocation(position, current_type, ""));
 
